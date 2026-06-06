@@ -1,0 +1,27 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+@theme {
+  --color-cobrar-bg: #07070E;
+  --color-cobrar-bg2: #0D0D1C;
+  --color-cobrar-bg3: #111126;
+  --color-cobrar-green: #00E87A;
+  --color-cobrar-orange: #FF6B35;
+  --color-cobrar-purple: #7C3AED;
+  --color-cobrar-txt: #EEEEFF;
+  --color-cobrar-txt2: #8888AA;
+  --color-cobrar-txt3: #44445A;
+  --color-cobrar-border: rgba(255,255,255,0.07);
+
+  --font-head: "Plus Jakarta Sans", sans-serif;
+  --font-body: "Inter", sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-cobrar-bg);
+    color: var(--color-cobrar-txt);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+}

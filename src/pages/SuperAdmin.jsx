@@ -14,7 +14,7 @@ export default function SuperAdmin() {
   useEffect(() => {
     // Basic frontend check just to prevent casual snooping, RLS does the real security
     if (user?.email !== 'gamesexdy@gmail.com' && profile?.role !== 'Superadmin') {
-      navigate('/dashboard');
+      navigate('/');
       return;
     }
     
@@ -59,7 +59,7 @@ export default function SuperAdmin() {
   const handleImpersonate = (storeId, storeName) => {
     setImpersonatedOwnerId(storeId);
     toast.success(`Entrando a la tienda: ${storeName}`);
-    navigate('/dashboard');
+    navigate('/');
   };
 
   if (loading) {

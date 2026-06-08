@@ -57,6 +57,13 @@ export default function SuperAdmin() {
   };
 
   const handleImpersonate = (storeId, storeName) => {
+    if (storeId === user.id) {
+      setImpersonatedOwnerId(null);
+      toast.success('Has vuelto a tu propia tienda');
+      navigate('/');
+      return;
+    }
+    
     setImpersonatedOwnerId(storeId);
     toast.success(`Entrando a la tienda: ${storeName}`);
     navigate('/');

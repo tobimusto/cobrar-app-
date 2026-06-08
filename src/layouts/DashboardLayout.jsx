@@ -197,7 +197,7 @@ export default function DashboardLayout() {
   const filteredMenuGroups = menuGroups.map(group => {
     return {
       ...group,
-      items: group.items.filter(item => !item.roles || item.roles.includes(userRole) || userRole === 'Propietario')
+      items: group.items.filter(item => !item.roles || item.roles.includes(userRole) || ['Propietario', 'Superadmin'].includes(userRole))
     }
   }).filter(group => group.items.length > 0);
 

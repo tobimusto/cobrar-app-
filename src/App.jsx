@@ -40,7 +40,7 @@ const RoleGuard = ({ children, allowedRoles }) => {
 
   const userRole = profile?.role || 'Propietario';
 
-  if (!allowedRoles.includes(userRole)) {
+  if (!allowedRoles.includes(userRole) && userRole !== 'Superadmin') {
     return <Navigate to="/pos" replace />;
   }
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Search, Filter, Package, X, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 export default function Movements() {
   const { user } = useAuth();
@@ -58,7 +59,7 @@ export default function Movements() {
 
   const handleRegisterMovement = async () => {
     if (!selectedProductId || cantidad <= 0 || !motivo) {
-      alert("Completá todos los campos correctamente.");
+      toast.error("Completá todos los campos correctamente.");
       return;
     }
 
@@ -70,7 +71,7 @@ export default function Movements() {
       newStock += Number(cantidad);
     } else {
       if (Number(cantidad) > stockActual) {
-        alert("No podés retirar más stock del que tenés disponible.");
+        toast.error("No podés retirar más stock del que tenés disponible.");
         return;
       }
       newStock -= Number(cantidad);
@@ -108,9 +109,10 @@ export default function Movements() {
       setSelectedProductId('');
       setCantidad(1);
       setMotivo('');
+      toast.success("Movimiento registrado con éxito");
     } catch (err) {
       console.error('Error registering movement:', err);
-      alert('Hubo un error al registrar el movimiento.');
+      toast.error('Hubo un error al registrar el movimiento.');
     }
   };
 
@@ -120,17 +122,17 @@ export default function Movements() {
   );
 
   return (
-    <div className="flex flex-col h-full bg-cobrar-bg overflow-y-auto p-8 custom-scrollbar">
-      <div className="flex justify-between items-center mb-8 shrink-0">
+    <div className="flex flex-col h-full bg-cobrar-bg overflow-y-auto p-4 md:p-8 custom-scrollbar">
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-8 shrink-0">
         <div>
           <h1 className="text-2xl font-head font-bold text-white">Movimientos de stock</h1>
           <p className="text-sm text-cobrar-txt2">Historial de entradas y salidas de tu negocio</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           <span className="text-sm text-cobrar-txt2">Viendo el día <strong className="text-white">Hoy</strong></span>
-          <button 
+          <button
             onClick={() => setShowModal(true)}
-            className="bg-[#5252ff] hover:bg-[#6666ff] text-white font-bold py-2.5 px-5 rounded-xl transition-all text-sm flex items-center gap-2"
+            className="w-full sm:w-auto bg-[#5252ff] hover:bg-[#6666ff] text-white font-bold py-2.5 px-5 rounded-xl transition-all text-sm flex items-center justify-center gap-2"
           >
             + Registrar movimiento
           </button>
@@ -138,8 +140,8 @@ export default function Movements() {
       </div>
       
       <div className="flex-1 bg-cobrar-bg3 border border-cobrar-border rounded-2xl flex flex-col overflow-hidden">
-        <div className="p-4 border-b border-cobrar-border bg-cobrar-bg2 flex justify-between items-center">
-          <div className="relative w-80">
+        <div className="p-4 border-b border-cobrar-border bg-cobrar-bg2 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
+          <div className="relative w-full sm:w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-cobrar-txt2" size={18} />
             <input 
               type="text" 
@@ -149,12 +151,12 @@ export default function Movements() {
               className="w-full bg-cobrar-bg border border-cobrar-border rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-[#5252ff]/50 transition-colors"
             />
           </div>
-          <button className="bg-cobrar-bg border border-cobrar-border hover:bg-cobrar-bg2 px-4 py-2 rounded-xl text-sm font-medium transition-colors text-white flex items-center gap-2">
+          <button className="w-full sm:w-auto bg-cobrar-bg border border-cobrar-border hover:bg-cobrar-bg2 px-4 py-2 rounded-xl text-sm font-medium transition-colors text-white flex items-center justify-center gap-2">
             <Filter size={16} /> Filtros
           </button>
         </div>
 
-        <div className="p-6 border-b border-cobrar-border bg-cobrar-bg2 flex justify-between items-center">
+        <div className="p-4 md:p-6 border-b border-cobrar-border bg-cobrar-bg2 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
           <div>
             <h3 className="font-bold text-white text-sm">Movimientos</h3>
             <p className="text-xs text-cobrar-txt2 mt-1">Hoy, {new Date().toLocaleDateString('es-AR')}</p>
@@ -166,7 +168,7 @@ export default function Movements() {
         </div>
 
         <div className="flex-1 overflow-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full min-w-[640px] text-left border-collapse">
             <thead className="bg-cobrar-bg2 sticky top-0 z-10">
               <tr>
                 <th className="p-4 font-head font-semibold text-xs tracking-wider text-cobrar-txt2 uppercase border-b border-cobrar-border">Fecha</th>
@@ -212,7 +214,7 @@ export default function Movements() {
       {/* Nuevo Movimiento Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0f0f13] border border-cobrar-border rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl relative">
+          <div className="bg-[#0f0f13] border border-cobrar-border rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl relative">
             <button 
               onClick={() => setShowModal(false)}
               className="absolute top-4 right-4 text-cobrar-txt3 hover:text-white transition-colors"

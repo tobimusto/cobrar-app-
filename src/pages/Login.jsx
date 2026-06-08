@@ -1,12 +1,19 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
+import { translateSupabaseError } from '../utils/errors';
 import { Store, User, Mail, Lock, Phone, LayoutDashboard, ChevronRight, CheckCircle2, ArrowRight } from 'lucide-react';
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState(''); // Email o Username para login
   const [password, setPassword] = useState('');
+  
+  // Registration States
+  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   
   // Wizard States
   const [step, setStep] = useState(1);
@@ -19,18 +26,47 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signOut } = useAuth();
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     try {
       setError('');
       setLoading(true);
-      const { error } = await signIn({ email, password });
+
+      let loginEmail = identifier;
+      
+      // Si el identificador no parece un email, asumimos que es un username y lo buscamos
+      if (!identifier.includes('@')) {
+        const { data: authData, error: authError } = await supabase.rpc('get_email_by_username', { p_username: identifier });
+        
+        if (authError || !authData) {
+          throw new Error('Usuario no encontrado o no se pudo resolver el email. Intentá usar tu email.');
+        }
+        
+        loginEmail = authData;
+      }
+
+      const { data: signInData, error } = await signIn({ email: loginEmail, password });
       if (error) throw error;
+
+      if (signInData?.user) {
+        // Verificar si el usuario está activo
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('active')
+          .eq('id', signInData.user.id)
+          .single();
+
+        if (profile && profile.active === false) {
+          await signOut(); // O await supabase.auth.signOut()
+          throw new Error('Tu cuenta ha sido desactivada por el administrador.');
+        }
+      }
+
       navigate('/pos');
     } catch (err) {
-      setError(err.message || 'Error al iniciar sesión');
+      setError(translateSupabaseError(err.message || 'Error al iniciar sesión'));
     } finally {
       setLoading(false);
     }
@@ -40,12 +76,16 @@ export default function Login() {
     try {
       setError('');
       setLoading(true);
-      // Extra data can be passed in metadata if needed, but for MVP we just sign up
-      const { error } = await signUp({ 
-        email, 
+      
+      const finalUsername = username || email.split('@')[0];
+      const finalEmail = email || `${finalUsername}@cobrarlocal.com`;
+
+      const { data: authData, error: authError } = await signUp({ 
+        email: finalEmail, 
         password,
         options: {
           data: {
+            username: finalUsername,
             full_name: name,
             business_name: businessName,
             category: category,
@@ -54,16 +94,48 @@ export default function Login() {
           }
         }
       });
-      if (error) throw error;
+      if (authError) throw authError;
+
+      const user = authData?.user;
+      if (user) {
+        // Verificar si existen perfiles para determinar el rol
+        const { data: existingProfiles, error: countError } = await supabase
+          .from('profiles')
+          .select('id')
+          .limit(1);
+
+        const isFirstUser = !existingProfiles || existingProfiles.length === 0;
+        const role = isFirstUser ? 'Propietario' : 'Gerente';
+
+        // Insertar en perfiles
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            username: finalUsername,
+            role: role,
+            owner_id: user.id // Un gerente/propietario registrado desde aquí es su propio owner
+          });
+
+        if (profileError) {
+          console.error("Error creating profile:", profileError);
+          // Opcional: mostrar un warning pero continuar
+        }
+      }
+
       navigate('/pos');
     } catch (err) {
-      setError(err.message || 'Error al registrarse');
+      setError(translateSupabaseError(err.message || 'Error al registrarse'));
       setLoading(false);
     }
   };
 
   const nextStep = () => {
-    if (step === 1 && (!email || !password)) return setError('Completá email y clave');
+    if (step === 1) {
+      if ((!email && !username) || !password || !confirmPassword) return setError('Completá usuario o email y contraseña');
+      if (password !== confirmPassword) return setError('Las contraseñas no coinciden');
+      if (password.length < 6) return setError('La contraseña debe tener al menos 6 caracteres');
+    }
     if (step === 2 && (!name || !businessName)) return setError('Completá nombre y negocio');
     if (step === 3 && (!category)) return setError('Seleccioná un rubro');
     
@@ -78,12 +150,24 @@ export default function Login() {
         return (
           <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
             <div>
-              <label className="block text-sm font-medium text-white mb-2">Email del comercio</label>
+              <label className="block text-sm font-medium text-white mb-2">Nombre de Usuario (Opcional si hay email)</label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-cobrar-txt2" size={18} />
+                <input 
+                  type="text" 
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s+/g, ''))}
+                  className="w-full bg-[#1a1a23] border border-[#5252ff]/30 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:border-[#5252ff] text-white transition-colors"
+                  placeholder="usuario_tienda"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-white mb-2">Email del comercio (Opcional si hay usuario)</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-cobrar-txt2" size={18} />
                 <input 
                   type="email" 
-                  required 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-[#1a1a23] border border-[#5252ff]/30 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:border-[#5252ff] text-white transition-colors"
@@ -100,6 +184,20 @@ export default function Login() {
                   required 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="w-full bg-[#1a1a23] border border-[#5252ff]/30 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:border-[#5252ff] text-white transition-colors tracking-widest"
+                  placeholder="••••••••"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-white mb-2">Confirmar Contraseña</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-cobrar-txt2" size={18} />
+                <input 
+                  type="password" 
+                  required 
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full bg-[#1a1a23] border border-[#5252ff]/30 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:border-[#5252ff] text-white transition-colors tracking-widest"
                   placeholder="••••••••"
                 />
@@ -153,12 +251,12 @@ export default function Login() {
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full bg-[#1a1a23] border border-[#5252ff]/30 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:border-[#5252ff] text-white transition-colors appearance-none"
                 >
-                  <option value="" disabled>Seleccioná un rubro...</option>
-                  <option value="kiosco">Kiosco / Despensa</option>
-                  <option value="almacen">Almacén / Minimercado</option>
-                  <option value="indumentaria">Indumentaria / Ropa</option>
-                  <option value="gastronomia">Gastronomía</option>
-                  <option value="otro">Otro</option>
+                  <option className="bg-[#1a1a23] text-white" value="" disabled>Seleccioná un rubro...</option>
+                  <option className="bg-[#1a1a23] text-white" value="kiosco">Kiosco / Despensa</option>
+                  <option className="bg-[#1a1a23] text-white" value="almacen">Almacén / Minimercado</option>
+                  <option className="bg-[#1a1a23] text-white" value="indumentaria">Indumentaria / Ropa</option>
+                  <option className="bg-[#1a1a23] text-white" value="gastronomia">Gastronomía</option>
+                  <option className="bg-[#1a1a23] text-white" value="otro">Otro</option>
                 </select>
               </div>
             </div>
@@ -213,7 +311,7 @@ export default function Login() {
         <span className="font-head font-bold text-2xl tracking-tight text-white">Cobr<span className="text-[#5252ff]">AR</span></span>
       </div>
 
-      <div className="w-full max-w-md bg-[#16161d] border border-cobrar-border rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+      <div className="w-full max-w-md bg-[#16161d] border border-cobrar-border rounded-2xl p-4 md:p-8 shadow-2xl relative overflow-hidden">
         
         {/* Toggle / Header */}
         <div className="mb-8">
@@ -247,22 +345,31 @@ export default function Login() {
         {isLogin ? (
           <form onSubmit={handleLoginSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-white mb-2">Email</label>
+              <label className="block text-sm font-medium text-white mb-2">Usuario o Email</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-cobrar-txt2" size={18} />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-cobrar-txt2" size={18} />
                 <input 
-                  type="email" 
+                  type="text" 
                   required 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   className="w-full bg-[#1a1a23] border border-cobrar-border rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:border-[#5252ff]/50 text-white transition-colors"
-                  placeholder="admin@comercio.com"
+                  placeholder="juan.kiosco o admin@correo.com"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-white mb-2">Contraseña</label>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-sm font-medium text-white">Contraseña</label>
+                <button 
+                  type="button"
+                  onClick={() => navigate('/reset-password')}
+                  className="text-xs text-[#5252ff] hover:text-white transition-colors"
+                >
+                  ¿Olvidaste tu contraseña?
+                </button>
+              </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-cobrar-txt2" size={18} />
                 <input 
@@ -270,7 +377,7 @@ export default function Login() {
                   required 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-[#1a1a23] border border-cobrar-border rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:border-[#5252ff]/50 text-white transition-colors"
+                  className="w-full bg-[#1a1a23] border border-cobrar-border rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:border-[#5252ff]/50 text-white transition-colors tracking-widest"
                   placeholder="••••••••"
                 />
               </div>

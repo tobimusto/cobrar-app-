@@ -1,15 +1,20 @@
 import { useState, useEffect } from 'react';
-import { Search, Plus, ShoppingBag, X, Loader2 } from 'lucide-react';
+import { Search, Plus, ShoppingBag, X, Loader2, Upload } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 export default function Purchases() {
-  const { user } = useAuth();
+  const { user, owner_id } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [purchases, setPurchases] = useState([]);
   const [products, setProducts] = useState([]);
+  const [providers, setProviders] = useState([]);
+  const [providerId, setProviderId] = useState('');
+  const [isNewProviderMode, setIsNewProviderMode] = useState(false);
+  const [newProviderName, setNewProviderName] = useState('');
 
   // New Purchase state
   const [selectedProductId, setSelectedProductId] = useState('');
@@ -19,11 +24,21 @@ export default function Purchases() {
   const [updatePrices, setUpdatePrices] = useState(false);
   const [fechaVencimiento, setFechaVencimiento] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  
+  const [barcodeInput, setBarcodeInput] = useState('');
+  
+  const [isNewProductMode, setIsNewProductMode] = useState(false);
+  const [newProductName, setNewProductName] = useState('');
+
+  const [precioPublico, setPrecioPublico] = useState('');
+  const [productIcon, setProductIcon] = useState('📦');
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (user) {
       fetchPurchases();
       fetchProducts();
+      fetchProviders();
     }
   }, [user]);
 
@@ -32,8 +47,8 @@ export default function Purchases() {
       setLoading(true);
       const { data, error } = await supabase
         .from('purchases')
-        .select(`*, products (name)`)
-        .eq('user_id', user.id)
+        .select(`*, products (name), providers (nombre)`)
+        .eq('user_id', owner_id)
         .order('fecha', { ascending: false });
       
       if (error) throw error;
@@ -49,7 +64,8 @@ export default function Purchases() {
     try {
       const { data, error } = await supabase
         .from('products')
-        .select('id, name, stock, price')
+        .select('id, name, stock, price, icon, code')
+        .eq('user_id', owner_id)
         .order('name');
       if (error) throw error;
       setProducts(data || []);
@@ -58,10 +74,57 @@ export default function Purchases() {
     }
   };
 
+  const fetchProviders = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('providers')
+        .select('id, nombre')
+        .eq('user_id', owner_id)
+        .order('nombre');
+      if (!error && data) setProviders(data);
+    } catch (err) {
+      console.error('Error fetching providers:', err);
+    }
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Por favor selecciona un archivo de imagen.');
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `${owner_id}/${fileName}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('product_images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('product_images')
+        .getPublicUrl(filePath);
+
+      setProductIcon(data.publicUrl);
+    } catch (err) {
+      console.error('Error in upload:', err);
+      toast.error('Hubo un error al subir la imagen. Asegúrate de haber ejecutado el SQL para crear el bucket "product_images".');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleRegisterPurchase = async () => {
     setErrorMsg('');
-    if (!selectedProductId) {
-      setErrorMsg('Selecciona un producto.');
+    if (!selectedProductId && (!isNewProductMode || !newProductName.trim())) {
+      setErrorMsg('Selecciona un producto o ingresa el nombre del nuevo.');
       return;
     }
     if (cantidad <= 0 || isNaN(cantidad)) {
@@ -86,56 +149,119 @@ export default function Purchases() {
     }
 
     const subtotal = cantidad * costo;
-    const selectedProduct = products.find(p => p.id === selectedProductId);
 
     try {
+      let finalProductId = selectedProductId;
+
+      let finalProviderId = providerId;
+
+      // -1. Si es modo nuevo proveedor, lo creamos primero
+      if (isNewProviderMode && newProviderName.trim()) {
+        const { data: newProv, error: provError } = await supabase.from('providers').insert([{
+          nombre: newProviderName.trim(),
+          user_id: owner_id
+        }]).select().single();
+        
+        if (provError) throw provError;
+        finalProviderId = newProv.id;
+        setProviders(prev => [...prev, newProv]);
+      }
+
+      // 0. Si es modo nuevo, creamos el producto primero
+      if (isNewProductMode) {
+        const { data: newProd, error: newProdError } = await supabase.from('products').insert([{
+          name: newProductName,
+          code: barcodeInput || '',
+          price: Number(precioPublico) || (Number(costo) * 1.3),
+          stock: 0, // Se actualizará en el paso 2 con la compra
+          icon: productIcon || '📦',
+          provider_id: finalProviderId || null,
+          unit: unidad,
+          user_id: owner_id
+        }]).select().single();
+
+        if (newProdError) throw newProdError;
+        finalProductId = newProd.id;
+        
+        // Agregar al estado local de productos (con stock 0 temporal, luego se actualiza)
+        setProducts(prev => [...prev, newProd]);
+      }
+
       // 1. Insert Purchase
       const { data: newPurchase, error: purchaseError } = await supabase
         .from('purchases')
         .insert([{
-          user_id: user.id,
-          product_id: selectedProductId,
+          user_id: owner_id,
+          employee_id: user.id,
+          product_id: finalProductId,
           cantidad: Number(cantidad),
           costo_unitario: Number(costo),
           subtotal: subtotal,
-          unidad_medida: unidad
+          unidad_medida: unidad,
+          provider_id: finalProviderId || null
         }])
-        .select(`*, products (name)`);
+        .select(`*, products (name), providers (nombre)`);
 
       if (purchaseError) throw purchaseError;
 
-      // 2. Update Product Stock (and optionally Price)
-      const newStock = (selectedProduct.stock || 0) + Number(cantidad);
+      // 2. Update Product Stock (and optionally Price/Icon)
+      // Necesitamos buscar el producto actualizado de la lista o el recién creado
+      const selectedProduct = products.find(p => p.id === finalProductId) || { stock: 0, icon: productIcon };
+      
+      const newStock = Number(selectedProduct.stock || 0) + Number(cantidad);
       const updatePayload = { stock: newStock };
       
-      if (updatePrices) {
-        // If they update price, set selling price to something higher than cost (e.g., 30% margin)
-        // Or just cost if they handle it manually. For MVP, we'll just set it to cost * 1.3
-        updatePayload.price = Number(costo) * 1.3;
+      if (productIcon && productIcon !== selectedProduct.icon) {
+        updatePayload.icon = productIcon;
+      }
+      
+      if (precioPublico && Number(precioPublico) > 0) {
+        updatePayload.price = Number(precioPublico);
       }
 
-      const { error: updateError } = await supabase
+      const { data: updatedProdData, error: updateError } = await supabase
         .from('products')
         .update(updatePayload)
-        .eq('id', selectedProductId);
+        .eq('id', finalProductId)
+        .select();
 
       if (updateError) throw updateError;
+      if (!updatedProdData || updatedProdData.length === 0) {
+         throw new Error('El producto no pudo actualizarse. Puede que no tengas permisos para modificarlo.');
+      }
+
+      // Registrar movimiento de stock
+      await supabase.from('stock_movements').insert([{
+        user_id: owner_id,
+        product_id: finalProductId,
+        tipo: 'entrada',
+        cantidad: Number(cantidad),
+        motivo: 'Compra de stock'
+      }]);
 
       // 3. Update local state
       setPurchases(prev => [newPurchase[0], ...prev]);
-      setProducts(prev => prev.map(p => p.id === selectedProductId ? { ...p, ...updatePayload } : p));
+      setProducts(prev => prev.map(p => p.id === finalProductId ? { ...p, ...updatePayload } : p));
       
       // Close modal and reset
       setShowModal(false);
       setSelectedProductId('');
+      setBarcodeInput('');
       setCantidad(1);
       setCosto(0);
-      setUpdatePrices(false);
+      setPrecioPublico('');
+      setProviderId('');
+      setIsNewProviderMode(false);
+      setNewProviderName('');
+      setProductIcon('📦');
+      setIsNewProductMode(false);
+      setNewProductName('');
+      toast.success('Compra registrada correctamente');
 
-    } catch (err) {
-      console.error('Error registering purchase:', err);
-      alert('Hubo un error al registrar la compra.');
-    }
+    } catch (error) {
+      console.error('Error registrando compra:', error);
+      toast.error('Hubo un error al registrar la compra.');
+    } finally { }
   };
 
   const filteredPurchases = purchases.filter(p => 
@@ -143,18 +269,28 @@ export default function Purchases() {
   );
 
   return (
-    <div className="flex flex-col h-full bg-cobrar-bg overflow-y-auto p-8 custom-scrollbar">
-      <div className="flex justify-between items-center mb-8 shrink-0">
+    <div className="flex flex-col h-full bg-cobrar-bg overflow-y-auto p-4 md:p-8 custom-scrollbar">
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-8 shrink-0">
         <div>
           <h1 className="text-2xl font-head font-bold text-white">Compras</h1>
           <p className="text-sm text-cobrar-txt2">Gestiona el historial de compras y mantené actualizado tu inventario.</p>
         </div>
-        <button 
-          onClick={() => setShowModal(true)}
-          className="bg-[#5252ff] hover:bg-[#6666ff] text-white font-bold py-2.5 px-5 rounded-xl transition-all text-sm flex items-center gap-2"
-        >
-          Nueva compra
-        </button>
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <button
+            disabled
+            className="bg-[#1a1a23] border border-cobrar-border text-cobrar-txt2 font-bold py-2.5 px-5 rounded-xl transition-all text-sm flex items-center justify-center gap-2 w-full sm:w-auto cursor-not-allowed opacity-70"
+            title="Función disponible próximamente en el Plan IA"
+          >
+            <span className="text-[10px] bg-cobrar-green/20 text-cobrar-green font-bold px-1.5 py-0.5 rounded uppercase tracking-widest mr-1">Pronto</span>
+            Escaneo de Factura IA
+          </button>
+          <button
+            onClick={() => setShowModal(true)}
+            className="bg-[#5252ff] hover:bg-[#6666ff] text-white font-bold py-2.5 px-5 rounded-xl transition-all text-sm flex items-center justify-center gap-2 w-full sm:w-auto"
+          >
+            <Plus size={18} /> Nueva compra
+          </button>
+        </div>
       </div>
       
       <div className="flex-1 bg-cobrar-bg3 border border-cobrar-border rounded-2xl flex flex-col overflow-hidden">
@@ -171,13 +307,13 @@ export default function Purchases() {
           </div>
         </div>
 
-        <div className="p-6 border-b border-cobrar-border bg-cobrar-bg2">
+        <div className="p-4 md:p-6 border-b border-cobrar-border bg-cobrar-bg2">
           <h3 className="font-bold text-white text-sm">Historial de compras</h3>
           <p className="text-xs text-cobrar-txt2 mt-1">Consulta las compras registradas y editalas cuando sea necesario.</p>
         </div>
 
-        <div className="flex-1 overflow-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="flex-1 overflow-auto overflow-x-auto">
+          <table className="w-full min-w-[640px] text-left border-collapse">
             <thead className="bg-cobrar-bg2 sticky top-0 z-10">
               <tr>
                 <th className="p-4 font-head font-semibold text-xs tracking-wider text-cobrar-txt2 uppercase border-b border-cobrar-border">Producto</th>
@@ -205,7 +341,21 @@ export default function Purchases() {
               ) : (
                 filteredPurchases.map(p => (
                   <tr key={p.id} className="border-b border-cobrar-border/50 hover:bg-cobrar-bg2 transition-colors">
-                    <td className="px-4 py-4 font-bold text-white">{p.products?.name || 'Desconocido'}</td>
+                    <td className="px-4 py-4 font-bold text-white">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded bg-[#1a1a23] border border-cobrar-border flex items-center justify-center shrink-0 overflow-hidden text-lg">
+                          {p.products?.icon?.startsWith('http') ? (
+                            <img src={p.products.icon} alt={p.products.name} className="w-full h-full object-cover" />
+                          ) : (
+                            p.products?.icon || '📦'
+                          )}
+                        </div>
+                        <div className="flex flex-col">
+                          <span>{p.products?.name || 'Desconocido'}</span>
+                          {p.providers?.nombre && <span className="text-xs text-cobrar-txt3 font-normal">Prov: {p.providers.nombre}</span>}
+                        </div>
+                      </div>
+                    </td>
                     <td className="px-4 py-4 text-cobrar-txt2">{new Date(p.fecha).toLocaleDateString()}</td>
                     <td className="px-4 py-4 text-cobrar-txt2">{p.unidad_medida}</td>
                     <td className="px-4 py-4 text-right text-cobrar-txt2">${Number(p.costo_unitario).toLocaleString()}</td>
@@ -223,7 +373,7 @@ export default function Purchases() {
       {/* Nueva Compra Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0f0f13] border border-cobrar-border rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl relative">
+          <div className="bg-[#0f0f13] border border-cobrar-border rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl relative">
             <button 
               onClick={() => setShowModal(false)}
               className="absolute top-4 right-4 text-cobrar-txt3 hover:text-white transition-colors"
@@ -231,54 +381,198 @@ export default function Purchases() {
               <X size={18} />
             </button>
             
-            <div className="p-6 border-b border-cobrar-border bg-cobrar-bg2">
+            <div className="p-4 md:p-6 border-b border-cobrar-border bg-cobrar-bg2">
               <h2 className="text-lg font-head font-bold text-white mb-1">Nueva compra</h2>
               <p className="text-sm text-cobrar-txt2">Registrá la compra para sumar stock automáticamente.</p>
             </div>
 
-            <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
+            <div className="p-4 md:p-6 space-y-4 overflow-y-auto custom-scrollbar">
               <div>
-                <label className="block text-xs font-medium text-white mb-2">Escanear Código de Barras</label>
-                <input 
-                  type="text" 
-                  placeholder="Escaneá el código aquí..."
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      const code = e.target.value.trim();
+                <label className="block text-xs font-medium text-white mb-2">Escanear o Escribir Código de Barras</label>
+                <div className="flex gap-2 mb-4">
+                  <input 
+                    type="text" 
+                    placeholder="Escaneá o escribí el código..."
+                    value={barcodeInput}
+                    onChange={(e) => setBarcodeInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const code = barcodeInput.trim();
+                        if (!code) return;
+                        const match = products.find(p => p.code === code);
+                        if (match) {
+                          setSelectedProductId(match.id);
+                          setProductIcon(match.icon || '📦');
+                          setPrecioPublico(match.price || '');
+                          setIsNewProductMode(false);
+                          setBarcodeInput(match.code || '');
+                        } else {
+                          setIsNewProductMode(true);
+                          setSelectedProductId('');
+                          setProductIcon('📦');
+                          setPrecioPublico('');
+                          setNewProductName('');
+                        }
+                      }
+                    }}
+                    className="flex-1 bg-cobrar-bg border border-cobrar-green/30 rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-cobrar-green text-white transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const code = barcodeInput.trim();
                       if (!code) return;
                       const match = products.find(p => p.code === code);
                       if (match) {
                         setSelectedProductId(match.id);
-                        e.target.value = ''; // clean up
+                        setProductIcon(match.icon || '📦');
+                        setPrecioPublico(match.price || '');
+                        setIsNewProductMode(false);
+                        setBarcodeInput(match.code || '');
                       } else {
-                        if (window.confirm('Producto no encontrado. ¿Deseas crearlo en tu catálogo?')) {
-                          window.location.href = `/inventory/new?code=${code}`;
-                        }
+                        setIsNewProductMode(true);
+                        setSelectedProductId('');
+                        setProductIcon('📦');
+                        setPrecioPublico('');
+                        setNewProductName('');
                       }
-                    }
-                  }}
-                  className="w-full bg-cobrar-bg border border-cobrar-green/30 rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-cobrar-green text-white transition-colors mb-4"
-                />
+                    }}
+                    className="bg-cobrar-green/20 hover:bg-cobrar-green/30 text-cobrar-green border border-cobrar-green/50 font-bold py-2.5 px-4 rounded-lg text-sm transition-colors"
+                  >
+                    Buscar
+                  </button>
+                </div>
               </div>
 
               <div>
                 <label className="block text-xs font-medium text-white mb-2">O seleccionar manualmente</label>
                 <div className="relative">
                   <select 
-                    value={selectedProductId}
-                    onChange={(e) => setSelectedProductId(e.target.value)}
+                    value={isNewProductMode ? '__NEW__' : selectedProductId}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '__NEW__') {
+                        setIsNewProductMode(true);
+                        setSelectedProductId('');
+                        setProductIcon('📦');
+                        setPrecioPublico('');
+                        setNewProductName('');
+                        setBarcodeInput('');
+                        setProviderId('');
+                        setIsNewProviderMode(false);
+                        setNewProviderName('');
+                      } else {
+                        setSelectedProductId(val);
+                        setIsNewProductMode(false);
+                        const p = products.find(prod => prod.id === val);
+                        if (p) {
+                          setProductIcon(p.icon || '📦');
+                          setPrecioPublico(p.price || '');
+                          setBarcodeInput(p.code || '');
+                        }
+                      }
+                    }}
                     className="w-full bg-[#1a1a23] border border-cobrar-border rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-[#5252ff]/50 text-white transition-colors appearance-none"
                   >
-                    <option value="">Selecciona un producto...</option>
+                    <option value="" disabled={isNewProductMode}>Selecciona un producto...</option>
+                    <option value="__NEW__" className="text-[#5252ff] font-bold">+ Crear Producto Nuevo</option>
                     {products.map(p => (
                       <option key={p.id} value={p.id}>{p.name} (Stock: {p.stock})</option>
                     ))}
                   </select>
                 </div>
               </div>
+              
+              {(selectedProductId || isNewProductMode) && (
+                <div className="flex flex-col gap-4 mt-4 animate-in fade-in slide-in-from-top-2">
+                  {isNewProductMode && (
+                    <div>
+                      <label className="block text-xs font-bold text-[#5252ff] mb-2">Nombre del Nuevo Producto *</label>
+                      <input 
+                        type="text" 
+                        value={newProductName}
+                        onChange={(e) => setNewProductName(e.target.value)}
+                        placeholder="Ej. Alfajor Havanna"
+                        className="w-full bg-[#1a1a23] border border-[#5252ff]/50 rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-[#5252ff] text-white transition-colors"
+                      />
+                    </div>
+                  )}
 
-              <div className="grid grid-cols-2 gap-4">
+                  <div className="flex gap-4 items-start">
+                  <div className="w-16 shrink-0 flex flex-col gap-2">
+                    <label className="block text-xs font-medium text-white mb-0 text-center" title="Adjunta una imagen o usa un Emoji">Imagen</label>
+                    <div className="relative group w-16 h-16 bg-[#1a1a23] border border-dashed border-cobrar-border hover:border-[#5252ff]/50 rounded-lg flex items-center justify-center overflow-hidden cursor-pointer transition-colors">
+                      {isUploading ? (
+                        <Loader2 size={20} className="text-[#5252ff] animate-spin" />
+                      ) : productIcon.startsWith('http') ? (
+                        <>
+                          <img src={productIcon} alt="Preview" className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                             <Upload size={16} className="text-white" />
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex flex-col items-center mt-1">
+                          <span className="text-2xl mb-1 leading-none">{productIcon || '📦'}</span>
+                          <span className="text-[8px] text-cobrar-txt2 uppercase font-bold tracking-wider opacity-0 group-hover:opacity-100 absolute bottom-1">Subir</span>
+                        </div>
+                      )}
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        disabled={isUploading}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        title="Subir foto del producto"
+                      />
+                    </div>
+                    <input 
+                      type="text"
+                      value={productIcon.startsWith('http') ? '' : productIcon}
+                      onChange={(e) => setProductIcon(e.target.value)}
+                      placeholder="o Emoji"
+                      maxLength={2}
+                      className="w-16 bg-[#1a1a23] border border-cobrar-border rounded-lg py-1 px-1 text-center text-[10px] focus:outline-none focus:border-[#5252ff]/50 text-white"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-xs font-medium text-white mb-2">Proveedor de esta compra</label>
+                    <select
+                      value={isNewProviderMode ? '__NEW__' : providerId}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === '__NEW__') {
+                          setIsNewProviderMode(true);
+                          setProviderId('');
+                        } else {
+                          setIsNewProviderMode(false);
+                          setProviderId(val);
+                        }
+                      }}
+                      className="w-full bg-[#1a1a23] border border-cobrar-border rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-[#5252ff]/50 text-white transition-colors appearance-none"
+                    >
+                      <option value="">-- Sin proveedor --</option>
+                      <option value="__NEW__" className="text-[#5252ff] font-bold">+ Agregar Proveedor Nuevo</option>
+                      {providers.map(p => (
+                        <option key={p.id} value={p.id}>{p.nombre}</option>
+                      ))}
+                    </select>
+                    {isNewProviderMode && (
+                      <input 
+                        type="text" 
+                        value={newProviderName}
+                        onChange={(e) => setNewProviderName(e.target.value)}
+                        placeholder="Nombre del nuevo proveedor"
+                        className="w-full bg-[#0f0f13] border border-[#5252ff]/50 rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-[#5252ff] text-white transition-colors mt-3 animate-in fade-in"
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-white mb-2">Cantidad</label>
                   <input 
@@ -308,7 +602,7 @@ export default function Purchases() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-white mb-2">Unidad de medida</label>
                   <select 
@@ -346,26 +640,30 @@ export default function Purchases() {
                 <div className="text-red-400 text-xs font-medium">{errorMsg}</div>
               )}
 
-              <div className="flex items-center justify-between bg-[#1a1a23] border border-cobrar-border p-4 rounded-lg mt-4">
-                <div className="pr-4">
-                  <p className="text-sm font-medium text-white">Actualizar precios de venta</p>
-                  <p className="text-xs text-cobrar-txt2 mt-1">Ajusta los precios del producto usando los valores de esta compra. Si no activas esta opción, mantendremos el precio actual.</p>
+              {(selectedProductId || isNewProductMode) && (
+                <div className="bg-[#1a1a23] border border-cobrar-border p-4 rounded-lg mt-2 animate-in fade-in">
+                  <label className="block text-xs font-bold text-white mb-2">Precio de Venta al Público ($)</label>
+                  <input 
+                    type="number" 
+                    value={precioPublico}
+                    onChange={(e) => setPrecioPublico(e.target.value)}
+                    placeholder={isNewProductMode ? "Opcional. Se calcula +30% por defecto." : "Dejar en blanco para no modificar"}
+                    className="w-full bg-[#0f0f13] border border-cobrar-border rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-[#5252ff] text-white"
+                  />
+                  <p className="text-[11px] text-cobrar-txt2 mt-2">
+                    {isNewProductMode 
+                      ? "Si lo dejas en blanco, se sumará un 30% al costo unitario para el precio de venta."
+                      : "Ajusta el precio del catálogo usando los valores de esta compra. Si lo dejas vacío, mantenemos el precio actual."}
+                  </p>
                 </div>
-                {/* Custom Toggle Switch */}
-                <div 
-                  onClick={() => setUpdatePrices(!updatePrices)}
-                  className={`w-10 h-5 rounded-full relative shrink-0 cursor-pointer transition-colors ${updatePrices ? 'bg-[#5252ff]' : 'bg-cobrar-border'}`}
-                >
-                  <div className={`w-3 h-3 bg-white rounded-full absolute top-1 transition-all ${updatePrices ? 'right-1' : 'left-1'}`}></div>
-                </div>
-              </div>
+              )}
             </div>
 
-            <div className="p-4 border-t border-cobrar-border bg-cobrar-bg2 flex items-center justify-between">
+            <div className="p-4 border-t border-cobrar-border bg-cobrar-bg2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="text-sm font-bold text-white flex gap-2">
                 Subtotal: <span className="text-[#5252ff]">${(cantidad * costo).toLocaleString('es-AR')}</span>
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-3 w-full sm:w-auto">
                 <button 
                   onClick={() => setShowModal(false)}
                   className="px-4 py-2 text-sm font-medium text-white hover:bg-[#1a1a23] border border-transparent hover:border-cobrar-border rounded-lg transition-colors"

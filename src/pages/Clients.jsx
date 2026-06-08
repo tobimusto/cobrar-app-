@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { Search, UserPlus, Users as UsersIcon, X, Loader2, Edit2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 export default function Clients() {
-  const { user } = useAuth();
+  const { user, owner_id } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [clients, setClients] = useState([]);
@@ -28,7 +29,7 @@ export default function Clients() {
       const { data, error } = await supabase
         .from('clients')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', owner_id)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -48,7 +49,7 @@ export default function Clients() {
         .from('clients')
         .insert([{
           ...newClient,
-          user_id: user.id
+          user_id: owner_id
         }])
         .select();
 
@@ -57,9 +58,10 @@ export default function Clients() {
       setClients(prev => [data[0], ...prev]);
       setShowModal(false);
       setNewClient({ nombre: '', telefono: '', cuit: '', iva: 'Consumidor Final', domicilio: '', provincia: '' });
+      toast.success('Cliente creado exitosamente');
     } catch (err) {
       console.error('Error creating client:', err);
-      alert('Hubo un error al crear el cliente.');
+      toast.error('Hubo un error al crear el cliente.');
     }
   };
 
@@ -100,9 +102,10 @@ export default function Clients() {
       setDebtAmount('');
       setErrorMsg('');
       setSelectedClient(null);
+      toast.success('Deuda actualizada correctamente');
     } catch (err) {
       console.error('Error updating debt:', err);
-      alert('Hubo un error al actualizar la deuda.');
+      toast.error('Hubo un error al actualizar la deuda.');
     }
   };
 
@@ -112,13 +115,13 @@ export default function Clients() {
   );
 
   return (
-    <div className="flex flex-col h-full bg-cobrar-bg overflow-y-auto p-8 custom-scrollbar">
-      <div className="flex justify-between items-center mb-8 shrink-0">
+    <div className="flex flex-col h-full bg-cobrar-bg overflow-y-auto p-4 md:p-8 custom-scrollbar">
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-8 shrink-0">
         <div>
           <h1 className="text-2xl font-head font-bold text-white">Clientes</h1>
           <p className="text-sm text-cobrar-txt2">Gestiona tus clientes y sus cuentas corrientes</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <button className="bg-cobrar-bg2 border border-cobrar-border hover:bg-cobrar-bg3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors text-white">
             Acciones ▼
           </button>
@@ -146,7 +149,7 @@ export default function Clients() {
           </div>
         </div>
 
-        <div className="p-6 border-b border-cobrar-border bg-cobrar-bg2">
+        <div className="p-4 md:p-6 border-b border-cobrar-border bg-cobrar-bg2">
           <h3 className="font-bold text-white text-sm">Lista de Clientes</h3>
           <p className="text-xs text-cobrar-txt2 mt-1">Lista de todos los clientes registrados.</p>
         </div>
@@ -169,8 +172,9 @@ export default function Clients() {
             </button>
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto p-6">
-            <table className="w-full text-left text-sm text-cobrar-txt2">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6">
+            <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] text-left text-sm text-cobrar-txt2">
               <thead className="text-xs text-cobrar-txt3 uppercase border-b border-cobrar-border">
                 <tr>
                   <th className="px-4 py-3">Nombre</th>
@@ -206,6 +210,7 @@ export default function Clients() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         )}
       </div>
@@ -213,7 +218,7 @@ export default function Clients() {
       {/* Nuevo Cliente Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0f0f13] border border-cobrar-border rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl relative">
+          <div className="bg-[#0f0f13] border border-cobrar-border rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl relative">
             <button 
               onClick={() => setShowModal(false)}
               className="absolute top-4 right-4 text-cobrar-txt3 hover:text-white transition-colors"
@@ -228,7 +233,7 @@ export default function Clients() {
             <div className="p-6 space-y-6">
               <div>
                 <h3 className="text-sm font-bold text-white mb-4">Información Básica</h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-white mb-2">Nombre *</label>
                     <input 
@@ -281,7 +286,7 @@ export default function Clients() {
 
               <div>
                 <h3 className="text-sm font-bold text-white mb-4">Domicilio</h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-white mb-2">Domicilio (Opcional)</label>
                     <input 
@@ -335,7 +340,7 @@ export default function Clients() {
       {/* Debt Modal */}
       {showDebtModal && selectedClient && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0f0f13] border border-cobrar-border rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl relative">
+          <div className="bg-[#0f0f13] border border-cobrar-border rounded-2xl w-full max-w-sm max-h-[90vh] overflow-y-auto shadow-2xl relative">
             <div className="p-6">
               <h2 className="text-lg font-head font-bold text-white mb-2">Modificar Deuda</h2>
               <p className="text-sm text-cobrar-txt2 mb-6">

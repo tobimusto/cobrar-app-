@@ -9,7 +9,7 @@ import {
   Users, UserCog, 
   BarChart3, 
   Settings, HelpCircle,
-  LogOut, Wallet, ChevronDown, ChevronUp, Check, X, ArrowUpCircle, ArrowDownCircle, Calculator, Menu, Truck, Globe, User
+  LogOut, Wallet, ChevronDown, ChevronUp, Check, X, ArrowUpCircle, ArrowDownCircle, Calculator, Menu, Truck, Globe, User, Shield
 } from 'lucide-react';
 
 export default function DashboardLayout() {
@@ -178,10 +178,18 @@ export default function DashboardLayout() {
             { name: 'Plan', path: '/settings?tab=Plan' },
           ]
         },
-
       ]
     }
   ];
+
+  if (user?.email === 'gamesexdy@gmail.com' || profile?.role === 'Superadmin') {
+    menuGroups.push({
+      title: 'SUPER ADMIN',
+      items: [
+        { name: 'Súper Admin', path: '/superadmin', icon: Shield, roles: ['Superadmin', 'Propietario'] }
+      ]
+    });
+  }
 
   // Filter menu based on role
   const userRole = profile?.role || 'Propietario'; 
@@ -491,6 +499,22 @@ export default function DashboardLayout() {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-full bg-cobrar-bg relative overflow-hidden z-10 min-w-0">
+
+        {/* Banner de Impersonación */}
+        {useAuth().impersonatedOwnerId && (
+          <div className="bg-red-500 text-white px-4 py-2 text-xs font-bold flex justify-between items-center z-50 shadow-md">
+            <div className="flex items-center gap-2">
+              <Shield size={16} />
+              Estás impersonando la tienda de otro usuario. Todo lo que hagas afectará a su cuenta real.
+            </div>
+            <button 
+              onClick={() => useAuth().setImpersonatedOwnerId(null)}
+              className="bg-black/20 hover:bg-black/40 px-3 py-1 rounded transition-colors"
+            >
+              Cerrar Impersonación
+            </button>
+          </div>
+        )}
 
         {/* Top bar (mobile) */}
         <header className="lg:hidden sticky top-0 z-30 flex items-center justify-between gap-3 px-4 py-2.5 bg-cobrar-bg2 border-b border-cobrar-border shrink-0 pt-[max(0.625rem,env(safe-area-inset-top))]">

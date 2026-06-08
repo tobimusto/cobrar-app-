@@ -7,6 +7,9 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [impersonatedOwnerId, setImpersonatedOwnerId] = useState(() => {
+    return localStorage.getItem('cobrar_impersonated_id') || null;
+  });
 
   const loadProfile = async (userId) => {
     try {
@@ -68,10 +71,30 @@ export const AuthProvider = ({ children }) => {
 
   // If the user has a profile, their owner_id is profile.owner_id (for employees).
   // If they don't have a profile yet (legacy user), they act as their own owner.
-  const owner_id = profile?.owner_id || user?.id;
+  // If superadmin is impersonating, use the impersonated ID.
+  const owner_id = impersonatedOwnerId || profile?.owner_id || user?.id;
+
+  const handleSetImpersonatedOwnerId = (id) => {
+    if (id) {
+      localStorage.setItem('cobrar_impersonated_id', id);
+    } else {
+      localStorage.removeItem('cobrar_impersonated_id');
+    }
+    setImpersonatedOwnerId(id);
+  };
 
   return (
-    <AuthContext.Provider value={{ user, profile, owner_id, signIn, signUp, signOut, loading }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      profile, 
+      owner_id, 
+      impersonatedOwnerId,
+      setImpersonatedOwnerId: handleSetImpersonatedOwnerId,
+      signIn, 
+      signUp, 
+      signOut, 
+      loading 
+    }}>
       {!loading && children}
     </AuthContext.Provider>
   );

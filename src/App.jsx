@@ -18,6 +18,7 @@ import OnlineStore from './pages/OnlineStore';
 import FAQ from './pages/FAQ';
 import ResetPassword from './pages/ResetPassword';
 import UpdatePassword from './pages/UpdatePassword';
+import SuperAdmin from './pages/SuperAdmin';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -71,7 +72,14 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/update-password" element={<UpdatePassword />} />
           <Route path="/c/:slugOrId" element={<Catalog />} />
+          <Route path="/online-store/:storeId" element={<OnlineStore />} />
           
+          <Route path="/superadmin" element={
+            <ProtectedRoute>
+              <SuperAdmin />
+            </ProtectedRoute>
+          } />
+
           <Route path="/" element={
             <ProtectedRoute>
               <DashboardLayout />

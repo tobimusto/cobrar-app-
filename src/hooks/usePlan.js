@@ -34,7 +34,7 @@ export const usePlan = () => {
   const { profile } = useAuth();
   
   // Determine current plan ID
-  const planId = profile?.plan || 'esencial';
+  const planId = (profile?.plan || 'esencial').toLowerCase();
   
   // Get features
   const planFeatures = PLAN_FEATURES[planId] || PLAN_FEATURES['esencial'];

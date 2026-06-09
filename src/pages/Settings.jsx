@@ -13,6 +13,7 @@ export default function Settings() {
   const navigate = useNavigate();
   const [openingTime, setOpeningTime] = useState('08:00');
   const [closingTime, setClosingTime] = useState('20:00');
+  const [estimatedMargin, setEstimatedMargin] = useState(30);
   
   // Catalog settings
   const [storeName, setStoreName] = useState('');
@@ -51,11 +52,6 @@ export default function Settings() {
   const bannerInputRef = useRef(null);
 
   useEffect(() => {
-    const savedOpening = localStorage.getItem('cobrar_opening_time') || '08:00';
-    const savedClosing = localStorage.getItem('cobrar_closing_time') || '20:00';
-    setOpeningTime(savedOpening);
-    setClosingTime(savedClosing);
-
     fetchStoreSettings();
   }, []);
 
@@ -101,6 +97,11 @@ export default function Settings() {
         setTransferDiscount(data.transfer_discount || 0);
         setCashSurcharge(data.cash_surcharge || 0);
         setCashDiscount(data.cash_discount || 0);
+        setEstimatedMargin(data.estimated_margin || 30);
+        if (data.business_hours) {
+          setOpeningTime(data.business_hours.opening || '08:00');
+          setClosingTime(data.business_hours.closing || '20:00');
+        }
       }
     } catch (err) {
       console.error('Error fetching store settings:', err);
@@ -108,9 +109,6 @@ export default function Settings() {
   };
 
   const handleSave = async () => {
-    localStorage.setItem('cobrar_opening_time', openingTime);
-    localStorage.setItem('cobrar_closing_time', closingTime);
-    
     setSaveStatus({ type: '', message: '' });
     setIsSaving(true);
     
@@ -138,6 +136,8 @@ export default function Settings() {
       transfer_discount: Number(transferDiscount),
       cash_surcharge: Number(cashSurcharge),
       cash_discount: Number(cashDiscount),
+      estimated_margin: Number(estimatedMargin),
+      business_hours: { opening: openingTime, closing: closingTime },
       user_id: user?.id
     };
 
@@ -250,11 +250,11 @@ export default function Settings() {
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto animate-in fade-in">
       <div className="mb-8">
-        <h1 className="text-2xl font-head font-bold text-white mb-2">Configuración</h1>
-        <p className="text-cobrar-txt2">Ajustá las preferencias de tu negocio y aplicación.</p>
+        <h1 className="text-2xl font-display font-bold text-text mb-2">Configuración</h1>
+        <p className="text-muted">Ajustá las preferencias de tu negocio y aplicación.</p>
         
         {saveStatus.message && (
-          <div className={`mt-4 p-3 rounded-lg flex items-center gap-2 ${saveStatus.type === 'error' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-cobrar-green/10 text-cobrar-green border border-cobrar-green/20'}`}>
+          <div className={`mt-4 p-3 rounded-lg flex items-center gap-2 ${saveStatus.type === 'error' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-brand/10 text-brand border border-cobrar-green/20'}`}>
             {saveStatus.type === 'error' ? <X size={18} /> : <CheckCircle2 size={18} />}
             <span className="text-sm font-bold">{saveStatus.message}</span>
           </div>
@@ -262,12 +262,12 @@ export default function Settings() {
       </div>
 
       {/* Tabs */}
-      <div className="flex overflow-x-auto gap-4 sm:gap-8 border-b border-cobrar-border mb-6 custom-scrollbar pb-2">
+      <div className="flex overflow-x-auto gap-4 sm:gap-8 border-b border-border mb-6 custom-scrollbar pb-2">
         {['Negocio', 'Horarios', 'POS', 'Plan'].map((tab) => (
           <button 
             key={tab}
             onClick={() => handleTabChange(tab)}
-            className={`px-2 py-2 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${activeTab === tab ? 'border-[#5252ff] text-white' : 'border-transparent text-cobrar-txt2 hover:text-white'}`}
+            className={`px-2 py-2 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${activeTab === tab ? 'border-brand text-text' : 'border-transparent text-muted hover:text-text'}`}
           >
             {tab}
           </button>
@@ -275,42 +275,53 @@ export default function Settings() {
       </div>
 
       {activeTab === 'Horarios' && (
-      <div className="bg-cobrar-bg2 border border-cobrar-border rounded-2xl overflow-hidden mb-6">
-        <div className="p-4 md:p-6 border-b border-cobrar-border">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Clock size={20} className="text-[#5252ff]" /> Horarios del Negocio
+      <div className="bg-surface border border-border rounded-2xl overflow-hidden mb-6">
+        <div className="p-4 md:p-6 border-b border-border">
+          <h2 className="text-lg font-bold text-text flex items-center gap-2">
+            <Clock size={20} className="text-brand" /> Horarios del Negocio
           </h2>
-          <p className="text-sm text-cobrar-txt2 mt-1">
+          <p className="text-sm text-muted mt-1">
             Se mostrará un recordatorio para abrir o cerrar la caja según estos horarios.
           </p>
         </div>
         
-        <div className="p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <div className="p-4 md:p-6 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           <div>
-            <label className="block text-sm font-bold text-white mb-2">Horario de Apertura</label>
+            <label className="block text-sm font-bold text-text mb-2">Horario de Apertura</label>
             <input 
               type="time" 
               value={openingTime}
               onChange={(e) => setOpeningTime(e.target.value)}
-              className="w-full bg-[#1a1a23] border border-cobrar-border rounded-xl py-3 px-4 text-white focus:outline-none focus:border-[#5252ff] transition-colors"
+              className="w-full bg-surface-2 border border-border rounded-xl py-3 px-4 text-text focus:outline-none focus:border-brand transition-colors"
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-white mb-2">Horario de Cierre</label>
+            <label className="block text-sm font-bold text-text mb-2">Horario de Cierre</label>
             <input 
               type="time" 
               value={closingTime}
               onChange={(e) => setClosingTime(e.target.value)}
-              className="w-full bg-[#1a1a23] border border-cobrar-border rounded-xl py-3 px-4 text-white focus:outline-none focus:border-[#5252ff] transition-colors"
+              className="w-full bg-surface-2 border border-border rounded-xl py-3 px-4 text-text focus:outline-none focus:border-brand transition-colors"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-text mb-2">Margen Estimado (%)</label>
+            <input 
+              type="number" 
+              min="0"
+              max="100"
+              value={estimatedMargin}
+              onChange={(e) => setEstimatedMargin(e.target.value)}
+              className="w-full bg-surface-2 border border-border rounded-xl py-3 px-4 text-text focus:outline-none focus:border-brand transition-colors"
             />
           </div>
         </div>
 
-        <div className="p-4 bg-cobrar-bg3 border-t border-cobrar-border flex justify-end">
+        <div className="p-4 bg-surface-2 border-t border-border flex justify-end">
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="bg-[#5252ff] hover:bg-[#6666ff] disabled:opacity-50 text-white font-bold py-2 px-6 rounded-lg transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
+            className="bg-brand hover:bg-brand-hover disabled:opacity-50 text-text font-bold py-2 px-6 rounded-lg transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
           >
             {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} 
             {isSaving ? 'Guardando...' : 'Guardar Cambios'}
@@ -320,86 +331,86 @@ export default function Settings() {
       )}
 
       {activeTab === 'POS' && (
-      <div className="bg-cobrar-bg2 border border-cobrar-border rounded-2xl overflow-hidden mb-6">
-        <div className="p-4 md:p-6 border-b border-cobrar-border">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <CheckCircle2 size={20} className="text-[#5252ff]" /> Recargos y Descuentos (POS)
+      <div className="bg-surface border border-border rounded-2xl overflow-hidden mb-6">
+        <div className="p-4 md:p-6 border-b border-border">
+          <h2 className="text-lg font-bold text-text flex items-center gap-2">
+            <CheckCircle2 size={20} className="text-brand" /> Recargos y Descuentos (POS)
           </h2>
-          <p className="text-sm text-cobrar-txt2 mt-1">
+          <p className="text-sm text-muted mt-1">
             Configurá los porcentajes que se aplicarán automáticamente al seleccionar un método de pago en el Punto de Venta.
           </p>
         </div>
         
         <div className="p-4 md:p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Tarjeta */}
-          <div className="bg-[#1a1a23] p-4 rounded-xl border border-cobrar-border">
-            <h3 className="text-md font-bold text-white mb-4">💳 Tarjeta</h3>
+          <div className="bg-surface-2 p-4 rounded-xl border border-border">
+            <h3 className="text-md font-bold text-text mb-4">💳 Tarjeta</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-cobrar-txt2 mb-1">Recargo (%)</label>
+                <label className="block text-xs font-bold text-muted mb-1">Recargo (%)</label>
                 <input 
                   type="number" min="0" step="0.01" value={cardSurcharge} onChange={(e) => setCardSurcharge(e.target.value)}
-                  className="w-full bg-[#0f0f13] border border-cobrar-border rounded-lg p-2 text-white focus:border-[#5252ff] outline-none"
+                  className="w-full bg-bg border border-border rounded-lg p-2 text-text focus:border-brand outline-none"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-cobrar-txt2 mb-1">Descuento (%)</label>
+                <label className="block text-xs font-bold text-muted mb-1">Descuento (%)</label>
                 <input 
                   type="number" min="0" step="0.01" value={cardDiscount} onChange={(e) => setCardDiscount(e.target.value)}
-                  className="w-full bg-[#0f0f13] border border-cobrar-border rounded-lg p-2 text-white focus:border-[#5252ff] outline-none"
+                  className="w-full bg-bg border border-border rounded-lg p-2 text-text focus:border-brand outline-none"
                 />
               </div>
             </div>
           </div>
           
           {/* Transferencia */}
-          <div className="bg-[#1a1a23] p-4 rounded-xl border border-cobrar-border">
-            <h3 className="text-md font-bold text-white mb-4">📱 Transferencia</h3>
+          <div className="bg-surface-2 p-4 rounded-xl border border-border">
+            <h3 className="text-md font-bold text-text mb-4">📱 Transferencia</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-cobrar-txt2 mb-1">Recargo (%)</label>
+                <label className="block text-xs font-bold text-muted mb-1">Recargo (%)</label>
                 <input 
                   type="number" min="0" step="0.01" value={transferSurcharge} onChange={(e) => setTransferSurcharge(e.target.value)}
-                  className="w-full bg-[#0f0f13] border border-cobrar-border rounded-lg p-2 text-white focus:border-[#5252ff] outline-none"
+                  className="w-full bg-bg border border-border rounded-lg p-2 text-text focus:border-brand outline-none"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-cobrar-txt2 mb-1">Descuento (%)</label>
+                <label className="block text-xs font-bold text-muted mb-1">Descuento (%)</label>
                 <input 
                   type="number" min="0" step="0.01" value={transferDiscount} onChange={(e) => setTransferDiscount(e.target.value)}
-                  className="w-full bg-[#0f0f13] border border-cobrar-border rounded-lg p-2 text-white focus:border-[#5252ff] outline-none"
+                  className="w-full bg-bg border border-border rounded-lg p-2 text-text focus:border-brand outline-none"
                 />
               </div>
             </div>
           </div>
 
           {/* Efectivo */}
-          <div className="bg-[#1a1a23] p-4 rounded-xl border border-cobrar-border">
-            <h3 className="text-md font-bold text-white mb-4">💵 Efectivo</h3>
+          <div className="bg-surface-2 p-4 rounded-xl border border-border">
+            <h3 className="text-md font-bold text-text mb-4">💵 Efectivo</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-cobrar-txt2 mb-1">Recargo (%)</label>
+                <label className="block text-xs font-bold text-muted mb-1">Recargo (%)</label>
                 <input 
                   type="number" min="0" step="0.01" value={cashSurcharge} onChange={(e) => setCashSurcharge(e.target.value)}
-                  className="w-full bg-[#0f0f13] border border-cobrar-border rounded-lg p-2 text-white focus:border-[#5252ff] outline-none"
+                  className="w-full bg-bg border border-border rounded-lg p-2 text-text focus:border-brand outline-none"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-cobrar-txt2 mb-1">Descuento (%)</label>
+                <label className="block text-xs font-bold text-muted mb-1">Descuento (%)</label>
                 <input 
                   type="number" min="0" step="0.01" value={cashDiscount} onChange={(e) => setCashDiscount(e.target.value)}
-                  className="w-full bg-[#0f0f13] border border-cobrar-border rounded-lg p-2 text-white focus:border-[#5252ff] outline-none"
+                  className="w-full bg-bg border border-border rounded-lg p-2 text-text focus:border-brand outline-none"
                 />
               </div>
             </div>
           </div>
         </div>
 
-        <div className="p-4 bg-cobrar-bg3 border-t border-cobrar-border flex justify-end">
+        <div className="p-4 bg-surface-2 border-t border-border flex justify-end">
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="bg-[#5252ff] hover:bg-[#6666ff] disabled:opacity-50 text-white font-bold py-2 px-6 rounded-lg transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
+            className="bg-brand hover:bg-brand-hover disabled:opacity-50 text-text font-bold py-2 px-6 rounded-lg transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
           >
             {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} 
             {isSaving ? 'Guardando...' : 'Guardar Cambios POS'}
@@ -410,45 +421,45 @@ export default function Settings() {
 
       {activeTab === 'Negocio' && (
         <div className="space-y-6">
-          <div className="bg-[#16161e] border border-cobrar-border rounded-2xl overflow-hidden">
-            <div className="p-4 md:p-6 border-b border-cobrar-border flex items-center gap-4">
-              <div className="w-12 h-12 bg-[#5252ff] rounded-lg flex items-center justify-center text-white font-bold text-xl uppercase">
+          <div className="bg-surface border border-border rounded-2xl overflow-hidden">
+            <div className="p-4 md:p-6 border-b border-border flex items-center gap-4">
+              <div className="w-12 h-12 bg-brand rounded-lg flex items-center justify-center text-text font-bold text-xl uppercase">
                 {storeName ? storeName.charAt(0) : 'N'}
               </div>
               <div>
-                <h2 className="text-lg font-bold text-white">{storeName || 'Mi Negocio'}</h2>
+                <h2 className="text-lg font-bold text-text">{storeName || 'Mi Negocio'}</h2>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs text-cobrar-txt3 bg-[#1a1a23] px-2 py-0.5 rounded border border-cobrar-border">{user?.id?.substring(0,8)}</span>
+                  <span className="text-xs text-dim bg-surface-2 px-2 py-0.5 rounded border border-border">{user?.id?.substring(0,8)}</span>
                 </div>
               </div>
             </div>
             
             <div className="p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-xs font-bold text-white mb-2">Nombre del Negocio</label>
+                <label className="block text-xs font-bold text-text mb-2">Nombre del Negocio</label>
                 <input 
                   type="text" 
                   value={storeName} 
                   onChange={(e) => setStoreName(e.target.value)}
-                  className="w-full bg-[#1a1a23] border border-cobrar-border rounded-lg p-2.5 text-white focus:border-[#5252ff] outline-none transition-colors"
+                  className="w-full bg-surface-2 border border-border rounded-lg p-2.5 text-text focus:border-brand outline-none transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-white mb-2">CUIT del Negocio</label>
+                <label className="block text-xs font-bold text-text mb-2">CUIT del Negocio</label>
                 <input 
                   type="text" 
                   value={cuit} 
                   onChange={(e) => setCuit(e.target.value)}
                   placeholder="20-12345678-9"
-                  className="w-full bg-[#1a1a23] border border-cobrar-border rounded-lg p-2.5 text-white focus:border-[#5252ff] outline-none transition-colors"
+                  className="w-full bg-surface-2 border border-border rounded-lg p-2.5 text-text focus:border-brand outline-none transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-white mb-2">País</label>
+                <label className="block text-xs font-bold text-text mb-2">País</label>
                 <select 
                   value={country} 
                   onChange={(e) => setCountry(e.target.value)}
-                  className="w-full bg-[#1a1a23] border border-cobrar-border rounded-lg p-2.5 text-white focus:border-[#5252ff] outline-none transition-colors appearance-none"
+                  className="w-full bg-surface-2 border border-border rounded-lg p-2.5 text-text focus:border-brand outline-none transition-colors appearance-none"
                 >
                   <option value="Argentina">Argentina</option>
                   <option value="Uruguay">Uruguay</option>
@@ -459,11 +470,11 @@ export default function Settings() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-bold text-white mb-2">Tipo de negocio</label>
+                <label className="block text-xs font-bold text-text mb-2">Tipo de negocio</label>
                 <select 
                   value={businessType} 
                   onChange={(e) => setBusinessType(e.target.value)}
-                  className="w-full bg-[#1a1a23] border border-cobrar-border rounded-lg p-2.5 text-white focus:border-[#5252ff] outline-none transition-colors appearance-none"
+                  className="w-full bg-surface-2 border border-border rounded-lg p-2.5 text-text focus:border-brand outline-none transition-colors appearance-none"
                 >
                   <option value="Kiosco">Kiosco</option>
                   <option value="Almacen">Almacén</option>
@@ -475,11 +486,11 @@ export default function Settings() {
               </div>
             </div>
             
-            <div className="p-4 bg-cobrar-bg3 border-t border-cobrar-border flex justify-end">
+            <div className="p-4 bg-surface-2 border-t border-border flex justify-end">
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="bg-[#5252ff] hover:bg-[#6666ff] disabled:opacity-50 text-white font-bold py-2 px-6 rounded-lg transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
+                className="bg-brand hover:bg-brand-hover disabled:opacity-50 text-text font-bold py-2 px-6 rounded-lg transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
               >
                 {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} 
                 {isSaving ? 'Guardando...' : 'Guardar Cambios'}
@@ -496,7 +507,7 @@ export default function Settings() {
               </div>
               <div className="flex-1">
                 <h3 className="text-red-500 font-bold text-lg">Restablecer negocio</h3>
-                <p className="text-sm text-cobrar-txt2 mt-1">
+                <p className="text-sm text-muted mt-1">
                   Elimina productos, compras, clientes, ventas y datos relacionados. <strong>No borra usuarios, plan ni configuración.</strong> Esta acción <strong>no se puede deshacer.</strong>
                 </p>
               </div>
@@ -513,69 +524,51 @@ export default function Settings() {
 
       {activeTab === 'Plan' && (
         <div className="space-y-6">
-          <div className="bg-[#16161e] border border-cobrar-border rounded-2xl overflow-hidden p-6">
+          <div className="bg-surface border border-border rounded-2xl overflow-hidden p-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
               <div>
-                <p className="text-xs font-bold tracking-widest text-[#5252ff] uppercase mb-1">Plan Actual</p>
-                <h2 className="text-2xl font-bold text-white mb-2">{planName}</h2>
-                <p className="text-sm text-cobrar-txt2">La gestión de cambios y pagos se realiza desde el flujo formal de planes.</p>
-              </div>
-              
-              {/* TEST SELECTOR - SOLO PARA DESARROLLO */}
-              <div className="bg-[#1a1a23] p-4 rounded-xl border border-dashed border-[#5252ff]/50">
-                <p className="text-xs font-bold text-white mb-2">Simulador de Plan (Test)</p>
-                <select 
-                  value={planId}
-                  onChange={(e) => {
-                    localStorage.setItem('cobrar_plan_override', e.target.value);
-                    window.location.reload();
-                  }}
-                  className="bg-[#0f0f13] border border-[#5252ff]/30 rounded-lg p-2 text-sm text-white focus:outline-none"
-                >
-                  <option value="esencial">Plan Esencial</option>
-                  <option value="pro">Plan Pro</option>
-                  <option value="ia">Plan IA</option>
-                </select>
-                <p className="text-[10px] text-cobrar-txt3 mt-2 max-w-[200px]">En producción, este selector debe ocultarse y el plan se lee directo de la base de datos de manera segura.</p>
+                <p className="text-xs font-bold tracking-widest text-brand uppercase mb-1">Plan Actual</p>
+                <h2 className="text-2xl font-bold text-text mb-2">{planName}</h2>
+                <p className="text-sm text-muted">La gestión de cambios y pagos se realiza desde el flujo formal de planes.</p>
               </div>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-[#1a1a23] border border-cobrar-border rounded-xl p-4">
-                <p className="text-xs font-bold text-cobrar-txt3 uppercase tracking-wider mb-2">Renovación</p>
-                <p className="font-bold text-white text-lg">Manual</p>
+              <div className="bg-surface-2 border border-border rounded-xl p-4">
+                <p className="text-xs font-bold text-dim uppercase tracking-wider mb-2">Renovación</p>
+                <p className="font-bold text-text text-lg">Manual</p>
               </div>
-              <div className="bg-[#1a1a23] border border-cobrar-border rounded-xl p-4">
-                <p className="text-xs font-bold text-cobrar-txt3 uppercase tracking-wider mb-2">Vencimiento</p>
-                <p className="font-bold text-white text-lg">14 de jun de 2026</p>
+              <div className="bg-surface-2 border border-border rounded-xl p-4">
+                <p className="text-xs font-bold text-dim uppercase tracking-wider mb-2">Vencimiento</p>
+                <p className="font-bold text-text text-lg">14 de jun de 2026</p>
               </div>
-              <div className="bg-[#1a1a23] border border-cobrar-border rounded-xl p-4">
-                <p className="text-xs font-bold text-cobrar-txt3 uppercase tracking-wider mb-2">Días restantes</p>
-                <p className="font-bold text-white text-lg">7 días</p>
+              <div className="bg-surface-2 border border-border rounded-xl p-4">
+                <p className="text-xs font-bold text-dim uppercase tracking-wider mb-2">Días restantes</p>
+                <p className="font-bold text-text text-lg">7 días</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-[#16161e] border border-cobrar-border rounded-2xl overflow-hidden">
-            <div className="p-6 border-b border-cobrar-border">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <span className="bg-cobrar-bg3 px-2 py-1 rounded text-sm">$</span> Historial de pagos
+          <div className="bg-surface border border-border rounded-2xl overflow-hidden">
+            <div className="p-6 border-b border-border">
+              <h3 className="text-lg font-bold text-text flex items-center gap-2">
+                <span className="bg-surface-2 px-2 py-1 rounded text-sm">$</span> Historial de pagos
               </h3>
             </div>
             <div className="p-6">
               <table className="w-full text-left text-sm border-collapse">
                 <thead>
-                  <tr className="border-b border-cobrar-border">
-                    <th className="pb-3 text-white font-bold">ID</th>
-                    <th className="pb-3 text-white font-bold">Fecha</th>
-                    <th className="pb-3 text-white font-bold">Plan</th>
-                    <th className="pb-3 text-white font-bold">Monto</th>
-                    <th className="pb-3 text-white font-bold">Estado</th>
+                  <tr className="border-b border-border">
+                    <th className="pb-3 text-text font-bold">ID</th>
+                    <th className="pb-3 text-text font-bold">Fecha</th>
+                    <th className="pb-3 text-text font-bold">Plan</th>
+                    <th className="pb-3 text-text font-bold">Monto</th>
+                    <th className="pb-3 text-text font-bold">Estado</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td colSpan="5" className="py-12 text-center text-cobrar-txt3">No hay pagos registrados.</td>
+                    <td colSpan="5" className="py-12 text-center text-dim">No hay pagos registrados.</td>
                   </tr>
                 </tbody>
               </table>

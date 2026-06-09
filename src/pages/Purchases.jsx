@@ -269,81 +269,81 @@ export default function Purchases() {
   );
 
   return (
-    <div className="flex flex-col h-full bg-cobrar-bg overflow-y-auto p-4 md:p-8 custom-scrollbar">
+    <div className="flex flex-col h-full bg-bg overflow-y-auto p-4 md:p-8 custom-scrollbar">
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-8 shrink-0">
         <div>
-          <h1 className="text-2xl font-head font-bold text-white">Compras</h1>
-          <p className="text-sm text-cobrar-txt2">Gestiona el historial de compras y mantené actualizado tu inventario.</p>
+          <h1 className="text-2xl font-display font-bold text-text">Compras</h1>
+          <p className="text-sm text-muted">Gestiona el historial de compras y mantené actualizado tu inventario.</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <button
             disabled
-            className="bg-[#1a1a23] border border-cobrar-border text-cobrar-txt2 font-bold py-2.5 px-5 rounded-xl transition-all text-sm flex items-center justify-center gap-2 w-full sm:w-auto cursor-not-allowed opacity-70"
+            className="bg-surface-2 border border-border text-muted font-bold py-2.5 px-5 rounded-xl transition-all text-sm flex items-center justify-center gap-2 w-full sm:w-auto cursor-not-allowed opacity-70"
             title="Función disponible próximamente en el Plan IA"
           >
-            <span className="text-[10px] bg-cobrar-green/20 text-cobrar-green font-bold px-1.5 py-0.5 rounded uppercase tracking-widest mr-1">Pronto</span>
+            <span className="text-[10px] bg-brand/20 text-brand font-bold px-1.5 py-0.5 rounded uppercase tracking-widest mr-1">Pronto</span>
             Escaneo de Factura IA
           </button>
           <button
             onClick={() => setShowModal(true)}
-            className="bg-[#5252ff] hover:bg-[#6666ff] text-white font-bold py-2.5 px-5 rounded-xl transition-all text-sm flex items-center justify-center gap-2 w-full sm:w-auto"
+            className="bg-brand hover:bg-brand-hover text-text font-bold py-2.5 px-5 rounded-xl transition-all text-sm flex items-center justify-center gap-2 w-full sm:w-auto"
           >
             <Plus size={18} /> Nueva compra
           </button>
         </div>
       </div>
       
-      <div className="flex-1 bg-cobrar-bg3 border border-cobrar-border rounded-2xl flex flex-col overflow-hidden">
-        <div className="p-4 border-b border-cobrar-border bg-cobrar-bg2">
+      <div className="flex-1 bg-surface-2 border border-border rounded-2xl flex flex-col overflow-hidden">
+        <div className="p-4 border-b border-border bg-surface">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-cobrar-txt2" size={18} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
             <input 
               type="text" 
               placeholder="Buscar por producto, unidad o usuario..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-cobrar-bg border border-cobrar-border rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-[#5252ff]/50 transition-colors"
+              className="w-full bg-bg border border-border rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-brand/50 transition-colors"
             />
           </div>
         </div>
 
-        <div className="p-4 md:p-6 border-b border-cobrar-border bg-cobrar-bg2">
-          <h3 className="font-bold text-white text-sm">Historial de compras</h3>
-          <p className="text-xs text-cobrar-txt2 mt-1">Consulta las compras registradas y editalas cuando sea necesario.</p>
+        <div className="p-4 md:p-6 border-b border-border bg-surface">
+          <h3 className="font-bold text-text text-sm">Historial de compras</h3>
+          <p className="text-xs text-muted mt-1">Consulta las compras registradas y editalas cuando sea necesario.</p>
         </div>
 
         <div className="flex-1 overflow-auto overflow-x-auto">
           <table className="w-full min-w-[640px] text-left border-collapse">
-            <thead className="bg-cobrar-bg2 sticky top-0 z-10">
+            <thead className="bg-surface sticky top-0 z-10">
               <tr>
-                <th className="p-4 font-head font-semibold text-xs tracking-wider text-cobrar-txt2 uppercase border-b border-cobrar-border">Producto</th>
-                <th className="p-4 font-head font-semibold text-xs tracking-wider text-cobrar-txt2 uppercase border-b border-cobrar-border">Fecha</th>
-                <th className="p-4 font-head font-semibold text-xs tracking-wider text-cobrar-txt2 uppercase border-b border-cobrar-border">Unidad</th>
-                <th className="p-4 font-head font-semibold text-xs tracking-wider text-cobrar-txt2 uppercase border-b border-cobrar-border text-right">Costo unitario</th>
-                <th className="p-4 font-head font-semibold text-xs tracking-wider text-cobrar-txt2 uppercase border-b border-cobrar-border text-center">Cantidad</th>
-                <th className="p-4 font-head font-semibold text-xs tracking-wider text-cobrar-txt2 uppercase border-b border-cobrar-border text-right">Subtotal</th>
-                <th className="p-4 font-head font-semibold text-xs tracking-wider text-cobrar-txt2 uppercase border-b border-cobrar-border">Usuario</th>
+                <th className="p-4 font-display font-semibold text-xs tracking-wider text-muted uppercase border-b border-border">Producto</th>
+                <th className="p-4 font-display font-semibold text-xs tracking-wider text-muted uppercase border-b border-border">Fecha</th>
+                <th className="p-4 font-display font-semibold text-xs tracking-wider text-muted uppercase border-b border-border">Unidad</th>
+                <th className="p-4 font-display font-semibold text-xs tracking-wider text-muted uppercase border-b border-border text-right">Costo unitario</th>
+                <th className="p-4 font-display font-semibold text-xs tracking-wider text-muted uppercase border-b border-border text-center">Cantidad</th>
+                <th className="p-4 font-display font-semibold text-xs tracking-wider text-muted uppercase border-b border-border text-right">Subtotal</th>
+                <th className="p-4 font-display font-semibold text-xs tracking-wider text-muted uppercase border-b border-border">Usuario</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
                   <td colSpan="7" className="p-12 text-center">
-                    <Loader2 className="animate-spin text-[#5252ff] mx-auto" size={32} />
+                    <Loader2 className="animate-spin text-brand mx-auto" size={32} />
                   </td>
                 </tr>
               ) : filteredPurchases.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="p-12 text-center text-cobrar-txt3 text-sm">
+                  <td colSpan="7" className="p-12 text-center text-dim text-sm">
                     No encontramos compras para los filtros seleccionados.
                   </td>
                 </tr>
               ) : (
                 filteredPurchases.map(p => (
-                  <tr key={p.id} className="border-b border-cobrar-border/50 hover:bg-cobrar-bg2 transition-colors">
-                    <td className="px-4 py-4 font-bold text-white">
+                  <tr key={p.id} className="border-b border-border/50 hover:bg-surface transition-colors">
+                    <td className="px-4 py-4 font-bold text-text">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded bg-[#1a1a23] border border-cobrar-border flex items-center justify-center shrink-0 overflow-hidden text-lg">
+                        <div className="w-8 h-8 rounded bg-surface-2 border border-border flex items-center justify-center shrink-0 overflow-hidden text-lg">
                           {p.products?.icon?.startsWith('http') ? (
                             <img src={p.products.icon} alt={p.products.name} className="w-full h-full object-cover" />
                           ) : (
@@ -352,16 +352,16 @@ export default function Purchases() {
                         </div>
                         <div className="flex flex-col">
                           <span>{p.products?.name || 'Desconocido'}</span>
-                          {p.providers?.nombre && <span className="text-xs text-cobrar-txt3 font-normal">Prov: {p.providers.nombre}</span>}
+                          {p.providers?.nombre && <span className="text-xs text-dim font-normal">Prov: {p.providers.nombre}</span>}
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-4 text-cobrar-txt2">{new Date(p.fecha).toLocaleDateString()}</td>
-                    <td className="px-4 py-4 text-cobrar-txt2">{p.unidad_medida}</td>
-                    <td className="px-4 py-4 text-right text-cobrar-txt2">${Number(p.costo_unitario).toLocaleString()}</td>
-                    <td className="px-4 py-4 text-center font-bold text-white">{p.cantidad}</td>
-                    <td className="px-4 py-4 text-right font-bold text-[#5252ff]">${Number(p.subtotal).toLocaleString()}</td>
-                    <td className="px-4 py-4 text-cobrar-txt2">Vos</td>
+                    <td className="px-4 py-4 text-muted">{new Date(p.fecha).toLocaleDateString()}</td>
+                    <td className="px-4 py-4 text-muted">{p.unidad_medida}</td>
+                    <td className="px-4 py-4 text-right text-muted">${Number(p.costo_unitario).toLocaleString()}</td>
+                    <td className="px-4 py-4 text-center font-bold text-text">{p.cantidad}</td>
+                    <td className="px-4 py-4 text-right font-bold text-brand">${Number(p.subtotal).toLocaleString()}</td>
+                    <td className="px-4 py-4 text-muted">Vos</td>
                   </tr>
                 ))
               )}
@@ -373,22 +373,22 @@ export default function Purchases() {
       {/* Nueva Compra Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0f0f13] border border-cobrar-border rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl relative">
+          <div className="bg-bg border border-border rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl relative">
             <button 
               onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 text-cobrar-txt3 hover:text-white transition-colors"
+              className="absolute top-4 right-4 text-dim hover:text-text transition-colors"
             >
               <X size={18} />
             </button>
             
-            <div className="p-4 md:p-6 border-b border-cobrar-border bg-cobrar-bg2">
-              <h2 className="text-lg font-head font-bold text-white mb-1">Nueva compra</h2>
-              <p className="text-sm text-cobrar-txt2">Registrá la compra para sumar stock automáticamente.</p>
+            <div className="p-4 md:p-6 border-b border-border bg-surface">
+              <h2 className="text-lg font-display font-bold text-text mb-1">Nueva compra</h2>
+              <p className="text-sm text-muted">Registrá la compra para sumar stock automáticamente.</p>
             </div>
 
             <div className="p-4 md:p-6 space-y-4 overflow-y-auto custom-scrollbar">
               <div>
-                <label className="block text-xs font-medium text-white mb-2">Escanear o Escribir Código de Barras</label>
+                <label className="block text-xs font-medium text-text mb-2">Escanear o Escribir Código de Barras</label>
                 <div className="flex gap-2 mb-4">
                   <input 
                     type="text" 
@@ -416,7 +416,7 @@ export default function Purchases() {
                         }
                       }
                     }}
-                    className="flex-1 bg-cobrar-bg border border-cobrar-green/30 rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-cobrar-green text-white transition-colors"
+                    className="flex-1 bg-bg border border-cobrar-green/30 rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-cobrar-green text-text transition-colors"
                   />
                   <button
                     type="button"
@@ -438,7 +438,7 @@ export default function Purchases() {
                         setNewProductName('');
                       }
                     }}
-                    className="bg-cobrar-green/20 hover:bg-cobrar-green/30 text-cobrar-green border border-cobrar-green/50 font-bold py-2.5 px-4 rounded-lg text-sm transition-colors"
+                    className="bg-brand/20 hover:bg-brand/30 text-brand border border-cobrar-green/50 font-bold py-2.5 px-4 rounded-lg text-sm transition-colors"
                   >
                     Buscar
                   </button>
@@ -446,7 +446,7 @@ export default function Purchases() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-white mb-2">O seleccionar manualmente</label>
+                <label className="block text-xs font-medium text-text mb-2">O seleccionar manualmente</label>
                 <div className="relative">
                   <select 
                     value={isNewProductMode ? '__NEW__' : selectedProductId}
@@ -473,10 +473,10 @@ export default function Purchases() {
                         }
                       }
                     }}
-                    className="w-full bg-[#1a1a23] border border-cobrar-border rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-[#5252ff]/50 text-white transition-colors appearance-none"
+                    className="w-full bg-surface-2 border border-border rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-brand/50 text-text transition-colors appearance-none"
                   >
                     <option value="" disabled={isNewProductMode}>Selecciona un producto...</option>
-                    <option value="__NEW__" className="text-[#5252ff] font-bold">+ Crear Producto Nuevo</option>
+                    <option value="__NEW__" className="text-brand font-bold">+ Crear Producto Nuevo</option>
                     {products.map(p => (
                       <option key={p.id} value={p.id}>{p.name} (Stock: {p.stock})</option>
                     ))}
@@ -488,34 +488,34 @@ export default function Purchases() {
                 <div className="flex flex-col gap-4 mt-4 animate-in fade-in slide-in-from-top-2">
                   {isNewProductMode && (
                     <div>
-                      <label className="block text-xs font-bold text-[#5252ff] mb-2">Nombre del Nuevo Producto *</label>
+                      <label className="block text-xs font-bold text-brand mb-2">Nombre del Nuevo Producto *</label>
                       <input 
                         type="text" 
                         value={newProductName}
                         onChange={(e) => setNewProductName(e.target.value)}
                         placeholder="Ej. Alfajor Havanna"
-                        className="w-full bg-[#1a1a23] border border-[#5252ff]/50 rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-[#5252ff] text-white transition-colors"
+                        className="w-full bg-surface-2 border border-brand/50 rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-brand text-text transition-colors"
                       />
                     </div>
                   )}
 
                   <div className="flex gap-4 items-start">
                   <div className="w-16 shrink-0 flex flex-col gap-2">
-                    <label className="block text-xs font-medium text-white mb-0 text-center" title="Adjunta una imagen o usa un Emoji">Imagen</label>
-                    <div className="relative group w-16 h-16 bg-[#1a1a23] border border-dashed border-cobrar-border hover:border-[#5252ff]/50 rounded-lg flex items-center justify-center overflow-hidden cursor-pointer transition-colors">
+                    <label className="block text-xs font-medium text-text mb-0 text-center" title="Adjunta una imagen o usa un Emoji">Imagen</label>
+                    <div className="relative group w-16 h-16 bg-surface-2 border border-dashed border-border hover:border-brand/50 rounded-lg flex items-center justify-center overflow-hidden cursor-pointer transition-colors">
                       {isUploading ? (
-                        <Loader2 size={20} className="text-[#5252ff] animate-spin" />
+                        <Loader2 size={20} className="text-brand animate-spin" />
                       ) : productIcon.startsWith('http') ? (
                         <>
                           <img src={productIcon} alt="Preview" className="w-full h-full object-cover" />
                           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                             <Upload size={16} className="text-white" />
+                             <Upload size={16} className="text-text" />
                           </div>
                         </>
                       ) : (
                         <div className="flex flex-col items-center mt-1">
                           <span className="text-2xl mb-1 leading-none">{productIcon || '📦'}</span>
-                          <span className="text-[8px] text-cobrar-txt2 uppercase font-bold tracking-wider opacity-0 group-hover:opacity-100 absolute bottom-1">Subir</span>
+                          <span className="text-[8px] text-muted uppercase font-bold tracking-wider opacity-0 group-hover:opacity-100 absolute bottom-1">Subir</span>
                         </div>
                       )}
                       <input 
@@ -533,11 +533,11 @@ export default function Purchases() {
                       onChange={(e) => setProductIcon(e.target.value)}
                       placeholder="o Emoji"
                       maxLength={2}
-                      className="w-16 bg-[#1a1a23] border border-cobrar-border rounded-lg py-1 px-1 text-center text-[10px] focus:outline-none focus:border-[#5252ff]/50 text-white"
+                      className="w-16 bg-surface-2 border border-border rounded-lg py-1 px-1 text-center text-[10px] focus:outline-none focus:border-brand/50 text-text"
                     />
                   </div>
                   <div className="flex-1">
-                    <label className="block text-xs font-medium text-white mb-2">Proveedor de esta compra</label>
+                    <label className="block text-xs font-medium text-text mb-2">Proveedor de esta compra</label>
                     <select
                       value={isNewProviderMode ? '__NEW__' : providerId}
                       onChange={(e) => {
@@ -550,10 +550,10 @@ export default function Purchases() {
                           setProviderId(val);
                         }
                       }}
-                      className="w-full bg-[#1a1a23] border border-cobrar-border rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-[#5252ff]/50 text-white transition-colors appearance-none"
+                      className="w-full bg-surface-2 border border-border rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-brand/50 text-text transition-colors appearance-none"
                     >
                       <option value="">-- Sin proveedor --</option>
-                      <option value="__NEW__" className="text-[#5252ff] font-bold">+ Agregar Proveedor Nuevo</option>
+                      <option value="__NEW__" className="text-brand font-bold">+ Agregar Proveedor Nuevo</option>
                       {providers.map(p => (
                         <option key={p.id} value={p.id}>{p.nombre}</option>
                       ))}
@@ -564,7 +564,7 @@ export default function Purchases() {
                         value={newProviderName}
                         onChange={(e) => setNewProviderName(e.target.value)}
                         placeholder="Nombre del nuevo proveedor"
-                        className="w-full bg-[#0f0f13] border border-[#5252ff]/50 rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-[#5252ff] text-white transition-colors mt-3 animate-in fade-in"
+                        className="w-full bg-bg border border-brand/50 rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-brand text-text transition-colors mt-3 animate-in fade-in"
                       />
                     )}
                   </div>
@@ -574,7 +574,7 @@ export default function Purchases() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-white mb-2">Cantidad</label>
+                  <label className="block text-xs font-medium text-text mb-2">Cantidad</label>
                   <input 
                     type="number" 
                     value={cantidad}
@@ -583,11 +583,11 @@ export default function Purchases() {
                       setErrorMsg('');
                     }}
                     min="1"
-                    className={`w-full bg-[#1a1a23] border rounded-lg py-2.5 px-4 text-sm focus:outline-none transition-colors ${errorMsg.includes('cantidad') ? 'border-red-500 focus:border-red-500 text-white' : 'border-[#5252ff]/30 focus:border-[#5252ff] text-white'}`}
+                    className={`w-full bg-surface-2 border rounded-lg py-2.5 px-4 text-sm focus:outline-none transition-colors ${errorMsg.includes('cantidad') ? 'border-red-500 focus:border-red-500 text-text' : 'border-brand/30 focus:border-brand text-text'}`}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-white mb-2">Costo unitario ($)</label>
+                  <label className="block text-xs font-medium text-text mb-2">Costo unitario ($)</label>
                   <input 
                     type="number" 
                     value={costo}
@@ -597,34 +597,34 @@ export default function Purchases() {
                     }}
                     min="0.01"
                     step="0.01"
-                    className={`w-full bg-[#1a1a23] border rounded-lg py-2.5 px-4 text-sm focus:outline-none transition-colors ${errorMsg.includes('costo') ? 'border-red-500 focus:border-red-500 text-white' : 'border-cobrar-border focus:border-[#5252ff]/50 text-white'}`}
+                    className={`w-full bg-surface-2 border rounded-lg py-2.5 px-4 text-sm focus:outline-none transition-colors ${errorMsg.includes('costo') ? 'border-red-500 focus:border-red-500 text-text' : 'border-border focus:border-brand/50 text-text'}`}
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-white mb-2">Unidad de medida</label>
+                  <label className="block text-xs font-medium text-text mb-2">Unidad de medida</label>
                   <select 
                     value={unidad}
                     onChange={(e) => setUnidad(e.target.value)}
-                    className="w-full bg-[#1a1a23] border border-cobrar-border rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-[#5252ff]/50 text-white transition-colors appearance-none"
+                    className="w-full bg-surface-2 border border-border rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-brand/50 text-text transition-colors appearance-none"
                   >
                     <option>Unidad</option>
                     <option>Caja</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-white mb-2">Fecha y hora</label>
+                  <label className="block text-xs font-medium text-text mb-2">Fecha y hora</label>
                   <input 
                     type="datetime-local" 
-                    className="w-full bg-[#1a1a23] border border-cobrar-border rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-[#5252ff]/50 text-white transition-colors custom-date-input"
+                    className="w-full bg-surface-2 border border-border rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-brand/50 text-text transition-colors custom-date-input"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-white mb-2">Fecha de vencimiento (opcional)</label>
+                <label className="block text-xs font-medium text-text mb-2">Fecha de vencimiento (opcional)</label>
                 <input 
                   type="date" 
                   value={fechaVencimiento}
@@ -632,7 +632,7 @@ export default function Purchases() {
                     setFechaVencimiento(e.target.value);
                     setErrorMsg('');
                   }}
-                  className={`w-full bg-[#1a1a23] border rounded-lg py-2.5 px-4 text-sm focus:outline-none transition-colors custom-date-input ${errorMsg.includes('vencimiento') || errorMsg.includes('pasado') ? 'border-red-500 focus:border-red-500 text-red-500' : 'border-cobrar-border focus:border-[#5252ff]/50 text-white'}`}
+                  className={`w-full bg-surface-2 border rounded-lg py-2.5 px-4 text-sm focus:outline-none transition-colors custom-date-input ${errorMsg.includes('vencimiento') || errorMsg.includes('pasado') ? 'border-red-500 focus:border-red-500 text-red-500' : 'border-border focus:border-brand/50 text-text'}`}
                 />
               </div>
 
@@ -641,16 +641,16 @@ export default function Purchases() {
               )}
 
               {(selectedProductId || isNewProductMode) && (
-                <div className="bg-[#1a1a23] border border-cobrar-border p-4 rounded-lg mt-2 animate-in fade-in">
-                  <label className="block text-xs font-bold text-white mb-2">Precio de Venta al Público ($)</label>
+                <div className="bg-surface-2 border border-border p-4 rounded-lg mt-2 animate-in fade-in">
+                  <label className="block text-xs font-bold text-text mb-2">Precio de Venta al Público ($)</label>
                   <input 
                     type="number" 
                     value={precioPublico}
                     onChange={(e) => setPrecioPublico(e.target.value)}
                     placeholder={isNewProductMode ? "Opcional. Se calcula +30% por defecto." : "Dejar en blanco para no modificar"}
-                    className="w-full bg-[#0f0f13] border border-cobrar-border rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-[#5252ff] text-white"
+                    className="w-full bg-bg border border-border rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-brand text-text"
                   />
-                  <p className="text-[11px] text-cobrar-txt2 mt-2">
+                  <p className="text-[11px] text-muted mt-2">
                     {isNewProductMode 
                       ? "Si lo dejas en blanco, se sumará un 30% al costo unitario para el precio de venta."
                       : "Ajusta el precio del catálogo usando los valores de esta compra. Si lo dejas vacío, mantenemos el precio actual."}
@@ -659,20 +659,20 @@ export default function Purchases() {
               )}
             </div>
 
-            <div className="p-4 border-t border-cobrar-border bg-cobrar-bg2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="text-sm font-bold text-white flex gap-2">
-                Subtotal: <span className="text-[#5252ff]">${(cantidad * costo).toLocaleString('es-AR')}</span>
+            <div className="p-4 border-t border-border bg-surface flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="text-sm font-bold text-text flex gap-2">
+                Subtotal: <span className="text-brand">${(cantidad * costo).toLocaleString('es-AR')}</span>
               </div>
               <div className="flex gap-3 w-full sm:w-auto">
                 <button 
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-sm font-medium text-white hover:bg-[#1a1a23] border border-transparent hover:border-cobrar-border rounded-lg transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-text hover:bg-surface-2 border border-transparent hover:border-border rounded-lg transition-colors"
                 >
                   Cancelar
                 </button>
                 <button 
                   onClick={handleRegisterPurchase}
-                  className="bg-[#5252ff] hover:bg-[#6666ff] text-white font-bold py-2 px-5 rounded-lg transition-all text-sm shadow-[0_4px_15px_rgba(82,82,255,0.3)]"
+                  className="bg-brand hover:bg-brand-hover text-text font-bold py-2 px-5 rounded-lg transition-all text-sm shadow-[0_4px_15px_rgba(82,82,255,0.3)]"
                 >
                   Registrar compra
                 </button>

@@ -158,25 +158,25 @@ export default function Users() {
   );
 
   const currentRole = profile?.role || 'Propietario';
-  if (currentRole !== 'Gerente' && currentRole !== 'Propietario') {
+  if (currentRole !== 'Gerente' && currentRole !== 'Propietario' && currentRole !== 'Superadmin') {
     return (
-      <div className="flex flex-col h-full bg-cobrar-bg items-center justify-center p-8 text-center">
-        <Shield size={48} className="text-[#5252ff] mb-4 opacity-50" />
-        <h2 className="text-xl font-bold text-white mb-2">Acceso Restringido</h2>
-        <p className="text-cobrar-txt2">No tenés permisos para gestionar los usuarios del sistema.</p>
+      <div className="flex flex-col h-full bg-bg items-center justify-center p-8 text-center">
+        <Shield size={48} className="text-brand mb-4 opacity-50" />
+        <h2 className="text-xl font-bold text-text mb-2">Acceso Restringido</h2>
+        <p className="text-muted">No tenés permisos para gestionar los usuarios del sistema.</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full bg-cobrar-bg overflow-y-auto p-4 md:p-8 custom-scrollbar">
+    <div className="flex flex-col h-full bg-bg overflow-y-auto p-4 md:p-8 custom-scrollbar">
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-8 shrink-0">
         <div>
-          <h1 className="text-2xl font-head font-bold text-white">Usuarios</h1>
-          <p className="text-sm text-cobrar-txt2">Gestiona el equipo de tu negocio</p>
+          <h1 className="text-2xl font-display font-bold text-text">Usuarios</h1>
+          <p className="text-sm text-muted">Gestiona el equipo de tu negocio</p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
-          <button className="flex items-center gap-2 text-sm font-medium text-cobrar-txt2 hover:text-white transition-colors bg-cobrar-bg2 px-4 py-2.5 rounded-xl border border-cobrar-border">
+          <button className="flex items-center gap-2 text-sm font-medium text-muted hover:text-text transition-colors bg-surface px-4 py-2.5 rounded-xl border border-border">
             <Mail size={16} /> Invitaciones Pendientes
           </button>
           <button 
@@ -187,7 +187,7 @@ export default function Users() {
                 setShowModal(true);
               }
             }}
-            className="bg-[#5252ff] hover:bg-[#6666ff] text-white font-bold py-2.5 px-5 rounded-xl transition-all text-sm flex items-center gap-2"
+            className="bg-brand hover:bg-brand-hover text-text font-bold py-2.5 px-5 rounded-xl transition-all text-sm flex items-center gap-2"
           >
             <UserPlus size={18} />
             Agregar Usuario
@@ -195,32 +195,32 @@ export default function Users() {
         </div>
       </div>
       
-      <div className="flex-1 bg-cobrar-bg3 border border-cobrar-border rounded-2xl flex flex-col overflow-hidden">
+      <div className="flex-1 bg-surface-2 border border-border rounded-2xl flex flex-col overflow-hidden">
         {/* Toolbar */}
-        <div className="p-4 border-b border-cobrar-border bg-cobrar-bg2 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center shrink-0">
+        <div className="p-4 border-b border-border bg-surface flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center shrink-0">
           <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-cobrar-txt2" size={18} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
             <input 
               type="text" 
               placeholder="Buscar usuarios..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-cobrar-bg border border-cobrar-border rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-[#5252ff]/50 transition-colors text-white"
+              className="w-full bg-bg border border-border rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-brand/50 transition-colors text-text"
             />
           </div>
-          <button className="bg-cobrar-bg border border-cobrar-border hover:bg-cobrar-bg2 px-4 py-2 rounded-xl text-sm font-medium transition-colors text-white flex items-center gap-2 w-full sm:w-auto justify-center">
+          <button className="bg-bg border border-border hover:bg-surface px-4 py-2 rounded-xl text-sm font-medium transition-colors text-text flex items-center gap-2 w-full sm:w-auto justify-center">
             <Filter size={16} /> Filtros
           </button>
         </div>
 
         {/* Header content */}
-        <div className="p-4 md:p-6 border-b border-cobrar-border bg-cobrar-bg2 flex justify-between items-center">
+        <div className="p-4 md:p-6 border-b border-border bg-surface flex justify-between items-center">
           <div>
-            <h3 className="font-bold text-white text-sm">Mi equipo</h3>
-            <p className="text-xs text-cobrar-txt2 mt-1">Gestiona los accesos y roles dentro de tu negocio.</p>
+            <h3 className="font-bold text-text text-sm">Mi equipo</h3>
+            <p className="text-xs text-muted mt-1">Gestiona los accesos y roles dentro de tu negocio.</p>
           </div>
-          <div className="text-sm text-cobrar-txt2 text-right">
-            <span className="font-bold text-white">{users.length}</span> / {plan.maxUsers} usuarios
+          <div className="text-sm text-muted text-right">
+            <span className="font-bold text-text">{users.length}</span> / {plan.maxUsers} usuarios
             {users.length >= plan.maxUsers && <div className="text-xs text-[#ff5252] font-bold">Límite alcanzado</div>}
           </div>
         </div>
@@ -228,30 +228,30 @@ export default function Users() {
         {/* Table */}
         <div className="flex-1 overflow-auto overflow-x-auto">
           {loading ? (
-            <div className="flex items-center justify-center h-48 text-cobrar-txt2">
+            <div className="flex items-center justify-center h-48 text-muted">
               <Loader2 className="animate-spin mr-2" size={24} /> Cargando usuarios...
             </div>
           ) : (
             <table className="w-full min-w-[640px] text-left border-collapse">
-              <thead className="bg-cobrar-bg2 sticky top-0 z-10">
+              <thead className="bg-surface sticky top-0 z-10">
                 <tr>
-                  <th className="p-4 font-head font-semibold text-xs tracking-wider text-cobrar-txt2 uppercase border-b border-cobrar-border">Nombre / Usuario</th>
-                  <th className="p-4 font-head font-semibold text-xs tracking-wider text-cobrar-txt2 uppercase border-b border-cobrar-border">Rol</th>
-                  <th className="p-4 font-head font-semibold text-xs tracking-wider text-cobrar-txt2 uppercase border-b border-cobrar-border">Fecha registro</th>
-                  <th className="p-4 font-head font-semibold text-xs tracking-wider text-cobrar-txt2 uppercase border-b border-cobrar-border text-right">Acciones</th>
+                  <th className="p-4 font-display font-semibold text-xs tracking-wider text-muted uppercase border-b border-border">Nombre / Usuario</th>
+                  <th className="p-4 font-display font-semibold text-xs tracking-wider text-muted uppercase border-b border-border">Rol</th>
+                  <th className="p-4 font-display font-semibold text-xs tracking-wider text-muted uppercase border-b border-border">Fecha registro</th>
+                  <th className="p-4 font-display font-semibold text-xs tracking-wider text-muted uppercase border-b border-border text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-cobrar-border">
+              <tbody>
                 {filteredUsers.map(u => (
-                  <tr key={u.id} className="hover:bg-cobrar-bg2/50 transition-colors group">
+                  <tr key={u.id} className="border-b border-border/50 hover:bg-surface transition-colors group">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#5252ff]/20 text-[#5252ff] flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden">
+                        <div className="w-8 h-8 rounded-full bg-brand/20 text-brand flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden">
                           {u.full_name ? u.full_name.charAt(0).toUpperCase() : u.username.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <div className="font-medium text-white text-sm">{u.full_name || u.username}</div>
-                          <div className="text-xs text-cobrar-txt3">@{u.username}</div>
+                          <div className="font-medium text-text text-sm">{u.full_name || u.username}</div>
+                          <div className="text-xs text-dim">@{u.username}</div>
                         </div>
                       </div>
                     </td>
@@ -260,16 +260,16 @@ export default function Users() {
                         value={u.role}
                         onChange={(e) => handleRoleChange(u.id, e.target.value)}
                         disabled={u.role === 'Propietario'}
-                        className="bg-transparent border border-cobrar-border rounded px-2 py-1 text-sm text-white focus:border-[#5252ff] disabled:opacity-50"
+                        className="bg-transparent border border-border rounded px-2 py-1 text-sm text-text focus:border-brand disabled:opacity-50"
                       >
-                        <option className="bg-[#1a1a23] text-white" value="Propietario" disabled>Propietario</option>
-                        <option className="bg-[#1a1a23] text-white" value="Gerente">Gerente</option>
-                        <option className="bg-[#1a1a23] text-white" value="Empleado PLUS">Empleado PLUS</option>
-                        <option className="bg-[#1a1a23] text-white" value="Empleado">Empleado</option>
-                        <option className="bg-[#1a1a23] text-white" value="Cajero">Cajero</option>
+                        <option className="bg-surface-2 text-text" value="Propietario" disabled>Propietario</option>
+                        <option className="bg-surface-2 text-text" value="Gerente">Gerente</option>
+                        <option className="bg-surface-2 text-text" value="Empleado PLUS">Empleado PLUS</option>
+                        <option className="bg-surface-2 text-text" value="Empleado">Empleado</option>
+                        <option className="bg-surface-2 text-text" value="Cajero">Cajero</option>
                       </select>
                     </td>
-                    <td className="p-4 text-cobrar-txt2 text-sm">
+                    <td className="p-4 text-muted text-sm">
                       {new Date(u.created_at).toLocaleDateString('es-AR')}
                     </td>
                     <td className="p-4 text-right">
@@ -286,7 +286,7 @@ export default function Users() {
                 ))}
                 {filteredUsers.length === 0 && (
                   <tr>
-                    <td colSpan="4" className="p-8 text-center text-cobrar-txt2">
+                    <td colSpan="4" className="p-8 text-center text-muted">
                       No se encontraron usuarios
                     </td>
                   </tr>
@@ -300,54 +300,54 @@ export default function Users() {
       {/* Agregar Usuario Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0f0f13] border border-cobrar-border rounded-2xl w-full max-w-[450px] max-h-[90vh] overflow-y-auto shadow-2xl relative">
+          <div className="bg-bg border border-border rounded-2xl w-full max-w-[450px] max-h-[90vh] overflow-y-auto shadow-2xl relative">
             <button 
               onClick={() => { setShowModal(false); resetForm(); }}
-              className="absolute top-4 right-4 text-cobrar-txt3 hover:text-white transition-colors"
+              className="absolute top-4 right-4 text-dim hover:text-text transition-colors"
             >
               <X size={18} />
             </button>
             
             <div className="p-6 pb-4 border-b border-transparent">
-              <h2 className="text-lg font-head font-bold text-white mb-1">Agregar usuario al negocio</h2>
-              <p className="text-sm text-cobrar-txt2">Crea una cuenta para tu empleado</p>
+              <h2 className="text-lg font-display font-bold text-text mb-1">Agregar usuario al negocio</h2>
+              <p className="text-sm text-muted">Crea una cuenta para tu empleado</p>
             </div>
 
             <div className="p-6 pt-0 space-y-4">
               <form onSubmit={handleCreateUser} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-white mb-2">Nombre Completo</label>
+                  <label className="block text-xs font-bold text-text mb-2">Nombre Completo</label>
                   <input 
                     type="text" 
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Juan Pérez"
-                    className="w-full bg-[#1a1a23] border border-cobrar-border rounded-lg py-3 px-4 text-sm focus:outline-none focus:border-[#5252ff]/50 text-white transition-colors"
+                    className="w-full bg-surface-2 border border-border rounded-lg py-3 px-4 text-sm focus:outline-none focus:border-brand/50 text-text transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-white mb-2">Nombre de Usuario (Opcional si hay email)</label>
+                  <label className="block text-xs font-bold text-text mb-2">Nombre de Usuario (Opcional si hay email)</label>
                   <input 
                     type="text" 
                     value={username}
                     onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s+/g, ''))}
                     placeholder="juan.kiosco"
-                    className="w-full bg-[#1a1a23] border border-cobrar-border rounded-lg py-3 px-4 text-sm focus:outline-none focus:border-[#5252ff]/50 text-white transition-colors"
+                    className="w-full bg-surface-2 border border-border rounded-lg py-3 px-4 text-sm focus:outline-none focus:border-brand/50 text-text transition-colors"
                   />
-                  <p className="text-[10px] text-cobrar-txt3 mt-1">Lo usará para iniciar sesión.</p>
+                  <p className="text-[10px] text-dim mt-1">Lo usará para iniciar sesión.</p>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-white mb-2">Email (Opcional si hay usuario)</label>
+                  <label className="block text-xs font-bold text-text mb-2">Email (Opcional si hay usuario)</label>
                   <input 
                     type="email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="empleado@correo.com"
-                    className="w-full bg-[#1a1a23] border border-cobrar-border rounded-lg py-3 px-4 text-sm focus:outline-none focus:border-[#5252ff]/50 text-white transition-colors"
+                    className="w-full bg-surface-2 border border-border rounded-lg py-3 px-4 text-sm focus:outline-none focus:border-brand/50 text-text transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-white mb-2">Contraseña Temporal *</label>
+                  <label className="block text-xs font-bold text-text mb-2">Contraseña Temporal *</label>
                   <input 
                     type="password" 
                     required
@@ -355,30 +355,30 @@ export default function Users() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full bg-[#1a1a23] border border-cobrar-border rounded-lg py-3 px-4 text-sm focus:outline-none focus:border-[#5252ff]/50 text-white transition-colors tracking-widest"
+                    className="w-full bg-surface-2 border border-border rounded-lg py-3 px-4 text-sm focus:outline-none focus:border-brand/50 text-text transition-colors tracking-widest"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-white mb-2 mt-2">Rol de Acceso *</label>
+                  <label className="block text-xs font-bold text-text mb-2 mt-2">Rol de Acceso *</label>
                   <div className="relative">
                     <select 
                       value={role}
                       onChange={(e) => setRole(e.target.value)}
-                      className="w-full bg-[#1a1a23] border border-cobrar-border rounded-lg py-3 px-4 text-sm focus:outline-none focus:border-[#5252ff]/50 text-white transition-colors appearance-none"
+                      className="w-full bg-surface-2 border border-border rounded-lg py-3 px-4 text-sm focus:outline-none focus:border-brand/50 text-text transition-colors appearance-none"
                     >
-                      <option className="bg-[#1a1a23] text-white" value="Gerente">Gerente (Acceso total)</option>
-                      <option className="bg-[#1a1a23] text-white" value="Empleado PLUS">Empleado PLUS (Caja + Inventario)</option>
-                      <option className="bg-[#1a1a23] text-white" value="Empleado">Empleado (Solo Venta e Inventario)</option>
-                      <option className="bg-[#1a1a23] text-white" value="Cajero">Cajero (Solo Venta)</option>
+                      <option className="bg-surface-2 text-text" value="Gerente">Gerente (Acceso total)</option>
+                      <option className="bg-surface-2 text-text" value="Empleado PLUS">Empleado PLUS (Caja + Inventario)</option>
+                      <option className="bg-surface-2 text-text" value="Empleado">Empleado (Solo Venta e Inventario)</option>
+                      <option className="bg-surface-2 text-text" value="Cajero">Cajero (Solo Venta)</option>
                     </select>
-                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-cobrar-txt2 pointer-events-none" size={16} />
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-muted pointer-events-none" size={16} />
                   </div>
                 </div>
 
                 <button 
                   type="submit"
                   disabled={processing}
-                  className="w-full bg-[#5252ff] hover:bg-[#6666ff] disabled:opacity-50 text-white font-bold py-3.5 rounded-xl transition-all text-sm mt-4 shadow-[0_4px_20px_rgba(82,82,255,0.2)] flex justify-center items-center gap-2"
+                  className="w-full bg-brand hover:bg-brand-hover disabled:opacity-50 text-text font-bold py-3.5 rounded-xl transition-all text-sm mt-4 shadow-[0_4px_20px_rgba(82,82,255,0.2)] flex justify-center items-center gap-2"
                 >
                   {processing && <Loader2 size={16} className="animate-spin" />}
                   {processing ? 'Creando...' : 'Crear Cuenta'}
@@ -392,18 +392,18 @@ export default function Users() {
       {/* Delete Confirmation Modal */}
       {userToDelete && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-[#0f0f13] border border-cobrar-border rounded-2xl w-full max-w-[400px] shadow-2xl relative overflow-hidden">
+          <div className="bg-bg border border-border rounded-2xl w-full max-w-[400px] shadow-2xl relative overflow-hidden">
             <div className="p-6">
-              <h2 className="text-lg font-head font-bold text-white mb-2">¿Borrar empleado?</h2>
-              <p className="text-sm text-cobrar-txt2 mb-6">
-                Estás a punto de borrar a <span className="font-bold text-white">@{userToDelete.username}</span>. Si este empleado ya tiene ventas registradas, no se borrará para preservar tu historial, sino que <strong>se le quitará el acceso permanentemente</strong>.
+              <h2 className="text-lg font-display font-bold text-text mb-2">¿Borrar empleado?</h2>
+              <p className="text-sm text-muted mb-6">
+                Estás a punto de borrar a <span className="font-bold text-text">@{userToDelete.username}</span>. Si este empleado ya tiene ventas registradas, no se borrará para preservar tu historial, sino que <strong>se le quitará el acceso permanentemente</strong>.
               </p>
               
               <div className="flex gap-3">
                 <button 
                   onClick={() => setUserToDelete(null)}
                   disabled={processing}
-                  className="flex-1 bg-cobrar-bg border border-cobrar-border hover:bg-cobrar-bg2 text-white font-medium py-2.5 rounded-xl transition-colors text-sm disabled:opacity-50"
+                  className="flex-1 bg-bg border border-border hover:bg-surface text-text font-medium py-2.5 rounded-xl transition-colors text-sm disabled:opacity-50"
                 >
                   Cancelar
                 </button>

@@ -160,29 +160,29 @@ export default function NewProduct() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-cobrar-bg overflow-y-auto">
+    <div className="flex flex-col h-full bg-bg overflow-y-auto">
       {/* Header */}
-      <div className="bg-cobrar-bg2 border-b border-cobrar-border p-4 md:p-6 sticky top-0 z-10">
+      <div className="bg-surface border-b border-border p-4 md:p-6 sticky top-0 z-10">
         <button 
           onClick={() => navigate('/inventory')}
-          className="flex items-center gap-2 text-cobrar-txt2 hover:text-white transition-colors text-sm font-medium mb-4"
+          className="flex items-center gap-2 text-muted hover:text-text transition-colors text-sm font-medium mb-4"
         >
           <ArrowLeft size={16} /> Volver a productos
         </button>
-        <h1 className="text-2xl font-head font-bold text-white">Nuevo Producto</h1>
-        <p className="text-sm text-cobrar-txt2">Crear un nuevo producto para tu catálogo</p>
+        <h1 className="text-2xl font-display font-bold text-text">Nuevo Producto</h1>
+        <p className="text-sm text-muted">Crear un nuevo producto para tu catálogo</p>
       </div>
 
       {/* Form Content */}
       <div className="p-4 md:p-8 max-w-4xl">
-        <form onSubmit={handleSubmit} className="bg-cobrar-bg3 border border-cobrar-border rounded-2xl p-4 md:p-8 shadow-lg">
+        <form onSubmit={handleSubmit} className="bg-surface-2 border border-border rounded-2xl p-4 md:p-8 shadow-lg">
           
-          <h2 className="text-lg font-head font-bold text-white mb-2">Información del producto</h2>
-          <p className="text-sm text-cobrar-txt2 mb-6">Gestión de productos y precios</p>
+          <h2 className="text-lg font-display font-bold text-text mb-2">Información del producto</h2>
+          <p className="text-sm text-muted mb-6">Gestión de productos y precios</p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
             <div>
-              <label className="block text-sm font-medium text-white mb-2">Nombre del producto *</label>
+              <label className="block text-sm font-medium text-text mb-2">Nombre del producto *</label>
               <input 
                 type="text" 
                 name="name"
@@ -190,11 +190,11 @@ export default function NewProduct() {
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="Ej. Coca Cola 2.25L"
-                className="w-full bg-cobrar-bg border border-cobrar-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cobrar-green/50 transition-colors"
+                className="w-full bg-bg border border-border rounded-xl px-4 py-3 text-text focus:outline-none focus:border-cobrar-green/50 transition-colors"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-white mb-2">Código/SKU *</label>
+              <label className="block text-sm font-medium text-text mb-2">Código/SKU *</label>
               <input 
                 type="text" 
                 name="code"
@@ -202,14 +202,14 @@ export default function NewProduct() {
                 value={formData.code}
                 onChange={handleChange}
                 placeholder="Código único o de barras"
-                className="w-full bg-cobrar-bg border border-cobrar-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cobrar-green/50 transition-colors"
+                className="w-full bg-bg border border-border rounded-xl px-4 py-3 text-text focus:outline-none focus:border-cobrar-green/50 transition-colors"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
             <div>
-              <label className="block text-sm font-medium text-white mb-2">Categoría</label>
+              <label className="block text-sm font-medium text-text mb-2">Categoría</label>
               {isNewCategory ? (
                 <div className="flex gap-2">
                   <input 
@@ -218,13 +218,13 @@ export default function NewProduct() {
                     value={formData.category}
                     onChange={handleChange}
                     placeholder="Escribí la nueva categoría..."
-                    className="w-full bg-cobrar-bg border border-cobrar-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cobrar-green/50 transition-colors"
+                    className="w-full bg-bg border border-border rounded-xl px-4 py-3 text-text focus:outline-none focus:border-cobrar-green/50 transition-colors"
                     autoFocus
                   />
                   <button 
                     type="button" 
                     onClick={() => { setIsNewCategory(false); setFormData(p => ({...p, category: ''})); }} 
-                    className="px-4 bg-cobrar-bg2 border border-cobrar-border rounded-xl text-cobrar-txt2 hover:text-white transition-colors"
+                    className="px-4 bg-surface border border-border rounded-xl text-muted hover:text-text transition-colors"
                   >
                     X
                   </button>
@@ -241,7 +241,7 @@ export default function NewProduct() {
                       handleChange(e);
                     }
                   }}
-                  className="w-full bg-cobrar-bg border border-cobrar-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cobrar-green/50 transition-colors appearance-none"
+                  className="w-full bg-bg border border-border rounded-xl px-4 py-3 text-text focus:outline-none focus:border-cobrar-green/50 transition-colors appearance-none"
                 >
                   <option value="">Seleccionar categoría...</option>
                   {existingCategories.map((cat, i) => <option key={i} value={cat}>{cat}</option>)}
@@ -250,12 +250,12 @@ export default function NewProduct() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-white mb-2">Proveedor</label>
+              <label className="block text-sm font-medium text-text mb-2">Proveedor</label>
               <select
                 name="provider"
                 value={formData.provider}
                 onChange={handleChange}
-                className="w-full bg-cobrar-bg border border-cobrar-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cobrar-green/50 transition-colors appearance-none"
+                className="w-full bg-bg border border-border rounded-xl px-4 py-3 text-text focus:outline-none focus:border-cobrar-green/50 transition-colors appearance-none"
               >
                 <option value="">-- Sin proveedor --</option>
                 {providers.map(p => (
@@ -267,21 +267,21 @@ export default function NewProduct() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6">
             <div className="w-20 shrink-0 flex flex-col gap-2">
-              <label className="block text-xs font-bold text-white mb-0 text-center" title="Adjunta una imagen o usa un Emoji">Imagen</label>
-              <div className="relative group w-20 h-20 bg-cobrar-bg border border-dashed border-cobrar-border hover:border-cobrar-green/50 rounded-xl flex items-center justify-center overflow-hidden cursor-pointer transition-colors">
+              <label className="block text-xs font-bold text-text mb-0 text-center" title="Adjunta una imagen o usa un Emoji">Imagen</label>
+              <div className="relative group w-20 h-20 bg-bg border border-dashed border-border hover:border-cobrar-green/50 rounded-xl flex items-center justify-center overflow-hidden cursor-pointer transition-colors">
                 {isUploading ? (
-                  <Loader2 size={24} className="text-cobrar-green animate-spin" />
+                  <Loader2 size={24} className="text-brand animate-spin" />
                 ) : formData.icon?.startsWith('http') ? (
                   <>
                     <img src={formData.icon} alt="Preview" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                       <Upload size={20} className="text-white" />
+                       <Upload size={20} className="text-text" />
                     </div>
                   </>
                 ) : (
                   <div className="flex flex-col items-center mt-1">
                     <span className="text-3xl mb-1 leading-none">{formData.icon || '📦'}</span>
-                    <span className="text-[9px] text-cobrar-txt2 uppercase font-bold tracking-wider opacity-0 group-hover:opacity-100 absolute bottom-2">Subir</span>
+                    <span className="text-[9px] text-muted uppercase font-bold tracking-wider opacity-0 group-hover:opacity-100 absolute bottom-2">Subir</span>
                   </div>
                 )}
                 <input 
@@ -299,16 +299,16 @@ export default function NewProduct() {
                 onChange={(e) => setFormData(p => ({...p, icon: e.target.value}))}
                 placeholder="o Emoji"
                 maxLength={2}
-                className="w-full bg-cobrar-bg border border-cobrar-border rounded-lg py-1 px-1 text-center text-xs focus:outline-none focus:border-cobrar-green/50 text-white"
+                className="w-full bg-bg border border-border rounded-lg py-1 px-1 text-center text-xs focus:outline-none focus:border-cobrar-green/50 text-text"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-white mb-2">Unidad de medida</label>
+              <label className="block text-sm font-medium text-text mb-2">Unidad de medida</label>
               <select 
                 name="unitType"
                 value={formData.unitType}
                 onChange={handleChange}
-                className="w-full bg-cobrar-bg border border-cobrar-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cobrar-green/50 transition-colors appearance-none"
+                className="w-full bg-bg border border-border rounded-xl px-4 py-3 text-text focus:outline-none focus:border-cobrar-green/50 transition-colors appearance-none"
               >
                 <option value="unidades">Unidades (u)</option>
                 <option value="kg">Kilogramos (kg)</option>
@@ -319,9 +319,9 @@ export default function NewProduct() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 border-t border-cobrar-border pt-6 mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 border-t border-border pt-6 mt-6">
             <div>
-              <label className="block text-sm font-medium text-white mb-2">
+              <label className="block text-sm font-medium text-text mb-2">
                 Cantidad disponible en {formData.unitType === 'unidades' ? 'unidades' : formData.unitType} *
               </label>
               <input 
@@ -331,28 +331,28 @@ export default function NewProduct() {
                 min="0"
                 value={formData.stock}
                 onChange={handleChange}
-                className="w-full bg-cobrar-bg border border-cobrar-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cobrar-green/50 transition-colors"
+                className="w-full bg-bg border border-border rounded-xl px-4 py-3 text-text focus:outline-none focus:border-cobrar-green/50 transition-colors"
               />
-              <p className="text-xs text-cobrar-txt2 mt-2">Usá la unidad real seleccionada para el stock.</p>
+              <p className="text-xs text-muted mt-2">Usá la unidad real seleccionada para el stock.</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-white mb-2">Alerta de stock</label>
+              <label className="block text-sm font-medium text-text mb-2">Alerta de stock</label>
               <input 
                 type="number" 
                 name="stockAlert"
                 min="0"
                 value={formData.stockAlert}
                 onChange={handleChange}
-                className="w-full bg-cobrar-bg border border-cobrar-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cobrar-green/50 transition-colors"
+                className="w-full bg-bg border border-border rounded-xl px-4 py-3 text-text focus:outline-none focus:border-cobrar-green/50 transition-colors"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mb-8 border-t border-cobrar-border pt-6 mt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mb-8 border-t border-border pt-6 mt-6">
             <div>
-              <label className="block text-sm font-medium text-white mb-2">Costo (Precio por {getUnitName()})</label>
+              <label className="block text-sm font-medium text-text mb-2">Costo (Precio por {getUnitName()})</label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-cobrar-txt2">$</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted">$</span>
                 <input 
                   type="number" 
                   name="cost"
@@ -361,12 +361,12 @@ export default function NewProduct() {
                   value={formData.cost}
                   onChange={handleChange}
                   onBlur={calculateFinalPrice}
-                  className="w-full bg-cobrar-bg border border-cobrar-border rounded-xl pl-8 pr-4 py-3 text-white focus:outline-none focus:border-cobrar-green/50 transition-colors"
+                  className="w-full bg-bg border border-border rounded-xl pl-8 pr-4 py-3 text-text focus:outline-none focus:border-cobrar-green/50 transition-colors"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-white mb-2">IVA (%) *</label>
+              <label className="block text-sm font-medium text-text mb-2">IVA (%) *</label>
               <input 
                 type="number" 
                 name="tax"
@@ -375,13 +375,13 @@ export default function NewProduct() {
                 value={formData.tax}
                 onChange={handleChange}
                 onBlur={calculateFinalPrice}
-                className="w-full bg-cobrar-bg border border-cobrar-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cobrar-green/50 transition-colors"
+                className="w-full bg-bg border border-border rounded-xl px-4 py-3 text-text focus:outline-none focus:border-cobrar-green/50 transition-colors"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-white mb-2">Precio final (Precio por {getUnitName()}) *</label>
+              <label className="block text-sm font-medium text-text mb-2">Precio final (Precio por {getUnitName()}) *</label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-cobrar-green font-bold">$</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-brand font-bold">$</span>
                 <input 
                   type="number" 
                   name="price"
@@ -390,24 +390,24 @@ export default function NewProduct() {
                   step="0.01"
                   value={formData.price}
                   onChange={handleChange}
-                  className="w-full bg-cobrar-bg border border-cobrar-green/50 rounded-xl pl-8 pr-4 py-3 text-white font-bold focus:outline-none focus:border-cobrar-green transition-colors"
+                  className="w-full bg-bg border border-cobrar-green/50 rounded-xl pl-8 pr-4 py-3 text-text font-bold focus:outline-none focus:border-cobrar-green transition-colors"
                 />
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-4 border-t border-cobrar-border pt-6 mt-8">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-4 border-t border-border pt-6 mt-8">
             <button
               type="button"
               onClick={() => navigate('/inventory')}
-              className="w-full sm:w-auto px-6 py-3 rounded-xl font-medium text-white hover:bg-cobrar-bg2 transition-colors border border-transparent hover:border-cobrar-border"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl font-medium text-text hover:bg-surface transition-colors border border-transparent hover:border-border"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="w-full sm:w-auto justify-center bg-[#5252ff] hover:bg-[#6666ff] text-white font-bold px-8 py-3 rounded-xl transition-all disabled:opacity-50 flex items-center gap-2 shadow-[0_4px_20px_rgba(82,82,255,0.2)]"
+              className="w-full sm:w-auto justify-center bg-brand hover:bg-brand-hover text-text font-bold px-8 py-3 rounded-xl transition-all disabled:opacity-50 flex items-center gap-2 shadow-[0_4px_20px_rgba(82,82,255,0.2)]"
             >
               {loading ? <Loader2 className="animate-spin" size={20} /> : <Save size={18} />}
               Crear Producto

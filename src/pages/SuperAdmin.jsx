@@ -13,7 +13,7 @@ export default function SuperAdmin() {
 
   useEffect(() => {
     // Basic frontend check just to prevent casual snooping, RLS does the real security
-    if (user?.email !== 'gamesexdy@gmail.com' && profile?.role !== 'Superadmin') {
+    if (profile?.role !== 'Superadmin') {
       navigate('/');
       return;
     }
@@ -71,30 +71,30 @@ export default function SuperAdmin() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-cobrar-bg">
-        <Loader2 className="animate-spin text-[#5252ff]" size={40} />
+      <div className="flex h-screen items-center justify-center bg-bg">
+        <Loader2 className="animate-spin text-brand" size={40} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-cobrar-bg p-8">
+    <div className="min-h-screen bg-bg p-8">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center gap-3 mb-8">
           <div className="bg-red-500/20 p-3 rounded-xl border border-red-500/50">
             <Shield className="text-red-500" size={28} />
           </div>
           <div>
-            <h1 className="text-3xl font-head font-bold text-white tracking-tight">Panel de Súper Administrador</h1>
-            <p className="text-cobrar-txt2">Control maestro de tiendas y usuarios.</p>
+            <h1 className="text-3xl font-display font-bold text-text tracking-tight">Panel de Súper Administrador</h1>
+            <p className="text-muted">Control maestro de tiendas y usuarios.</p>
           </div>
         </div>
 
-        <div className="bg-cobrar-bg2 border border-cobrar-border rounded-2xl overflow-hidden">
+        <div className="bg-surface border border-border rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-[#1a1a23] border-b border-cobrar-border text-xs uppercase tracking-wider text-cobrar-txt2">
+                <tr className="bg-surface-2 border-b border-border text-xs uppercase tracking-wider text-muted">
                   <th className="p-4 font-bold">Negocio</th>
                   <th className="p-4 font-bold">Usuario / Email</th>
                   <th className="p-4 font-bold">Rol</th>
@@ -104,30 +104,30 @@ export default function SuperAdmin() {
               </thead>
               <tbody>
                 {stores.map((store) => (
-                  <tr key={store.id} className="border-b border-cobrar-border/50 hover:bg-[#1a1a23]/50 transition-colors">
+                  <tr key={store.id} className="border-b border-border/50 hover:bg-surface-2/50 transition-colors">
                     <td className="p-4">
-                      <div className="font-bold text-white">{store.store_name}</div>
+                      <div className="font-bold text-text">{store.store_name}</div>
                     </td>
                     <td className="p-4">
-                      <div className="text-sm font-medium text-white">{store.username || 'Sin Username'}</div>
-                      <div className="text-xs text-cobrar-txt2 mt-0.5">{store.email || 'Email no disponible'}</div>
+                      <div className="text-sm font-medium text-text">{store.username || 'Sin Username'}</div>
+                      <div className="text-xs text-muted mt-0.5">{store.email || 'Email no disponible'}</div>
                     </td>
                     <td className="p-4">
                       <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider ${
-                        store.role === 'Superadmin' ? 'bg-red-500/20 text-red-500' : 'bg-[#5252ff]/20 text-[#5252ff]'
+                        store.role === 'Superadmin' ? 'bg-red-500/20 text-red-500' : 'bg-brand/20 text-brand'
                       }`}>
                         {store.role}
                       </span>
                     </td>
                     <td className="p-4">
-                      <code className="text-xs text-cobrar-txt2 bg-black/50 px-2 py-1 rounded">
+                      <code className="text-xs text-muted bg-black/50 px-2 py-1 rounded">
                         {store.id.substring(0, 8)}...
                       </code>
                     </td>
                     <td className="p-4 text-right">
                       <button 
                         onClick={() => handleImpersonate(store.id, store.store_name)}
-                        className="inline-flex items-center gap-2 bg-[#5252ff]/10 hover:bg-[#5252ff]/20 text-[#5252ff] border border-[#5252ff]/30 px-4 py-2 rounded-lg text-xs font-bold transition-all"
+                        className="inline-flex items-center gap-2 bg-brand/10 hover:bg-brand/20 text-brand border border-brand/30 px-4 py-2 rounded-lg text-xs font-bold transition-all"
                       >
                         <LogIn size={14} /> Entrar a tienda
                       </button>
@@ -139,7 +139,7 @@ export default function SuperAdmin() {
           </div>
           
           {stores.length === 0 && (
-            <div className="p-8 text-center text-cobrar-txt2">
+            <div className="p-8 text-center text-muted">
               No se encontraron tiendas.
             </div>
           )}

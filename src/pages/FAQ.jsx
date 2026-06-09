@@ -32,15 +32,15 @@ export default function FAQ() {
   ];
 
   return (
-    <div className="flex-1 bg-cobrar-bg min-h-screen p-8">
+    <div className="flex-1 bg-bg min-h-screen p-8">
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center gap-3 mb-8">
-          <div className="bg-cobrar-bg2 p-3 rounded-2xl border border-cobrar-border text-[#5252ff]">
+          <div className="bg-surface p-3 rounded-2xl border border-border text-brand">
             <HelpCircle size={24} />
           </div>
           <div>
-            <h1 className="text-2xl font-head font-bold text-white">Preguntas Frecuentes</h1>
-            <p className="text-cobrar-txt2 text-sm mt-1">Resolvé tus dudas rápidas sobre el uso del sistema.</p>
+            <h1 className="text-2xl font-display font-bold text-text">Preguntas Frecuentes</h1>
+            <p className="text-muted text-sm mt-1">Resolvé tus dudas rápidas sobre el uso del sistema.</p>
           </div>
         </div>
 
@@ -48,23 +48,23 @@ export default function FAQ() {
           {faqs.map((faq, idx) => (
             <div 
               key={idx} 
-              className={`bg-cobrar-bg2 border border-cobrar-border rounded-2xl overflow-hidden transition-all duration-300 ${openIndex === idx ? 'ring-1 ring-[#5252ff]' : ''}`}
+              className={`bg-surface border border-border rounded-2xl overflow-hidden transition-all duration-300 ${openIndex === idx ? 'ring-1 ring-brand' : ''}`}
             >
               <button 
                 onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
                 className="w-full flex items-center justify-between p-5 text-left focus:outline-none"
               >
-                <span className="font-bold text-white text-sm">{faq.q}</span>
+                <span className="font-bold text-text text-sm">{faq.q}</span>
                 <ChevronDown 
                   size={18} 
-                  className={`text-cobrar-txt2 transition-transform duration-300 ${openIndex === idx ? 'rotate-180' : ''}`}
+                  className={`text-muted transition-transform duration-300 ${openIndex === idx ? 'rotate-180' : ''}`}
                 />
               </button>
               
               <div 
                 className={`transition-all duration-300 ease-in-out ${openIndex === idx ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
               >
-                <div className="p-5 pt-0 text-cobrar-txt3 text-sm leading-relaxed border-t border-cobrar-border/50 mt-2">
+                <div className="p-5 pt-0 text-dim text-sm leading-relaxed border-t border-border/50 mt-2">
                   {faq.a}
                 </div>
               </div>
@@ -72,15 +72,15 @@ export default function FAQ() {
           ))}
         </div>
 
-        <div className="mt-12 bg-[#5252ff]/10 border border-[#5252ff]/30 rounded-2xl p-8 text-center animate-in fade-in slide-in-from-bottom-4">
-          <MessageCircle size={40} className="text-[#5252ff] mx-auto mb-4" />
-          <h2 className="text-lg font-bold text-white mb-2">¿Seguís teniendo dudas?</h2>
-          <p className="text-sm text-cobrar-txt2 mb-6">Nuestro equipo de soporte técnico está disponible para ayudarte a configurar tu negocio o resolver cualquier problema.</p>
+        <div className="mt-12 bg-brand/10 border border-brand/30 rounded-2xl p-8 text-center animate-in fade-in slide-in-from-bottom-4">
+          <MessageCircle size={40} className="text-brand mx-auto mb-4" />
+          <h2 className="text-lg font-bold text-text mb-2">¿Seguís teniendo dudas?</h2>
+          <p className="text-sm text-muted mb-6">Nuestro equipo de soporte técnico está disponible para ayudarte a configurar tu negocio o resolver cualquier problema.</p>
           <a 
             href="https://wa.me/5491100000000?text=Hola,%20necesito%20soporte%20con%20Cobrar" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-[#5252ff] hover:bg-[#6666ff] text-white font-bold py-3 px-6 rounded-xl transition-all shadow-[0_4px_15px_rgba(82,82,255,0.3)]"
+            className="inline-flex items-center gap-2 bg-brand hover:bg-brand-hover text-text font-bold py-3 px-6 rounded-xl transition-all shadow-[0_4px_15px_rgba(82,82,255,0.3)]"
           >
             <MessageCircle size={18} />
             Contactar Soporte por WhatsApp

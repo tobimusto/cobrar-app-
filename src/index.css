@@ -1,47 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
 
 @theme {
-  --color-cobrar-bg: #07070E;
-  --color-cobrar-bg2: #0D0D1C;
-  --color-cobrar-bg3: #111126;
-  --color-cobrar-accent: #6366FF;      /* primario centralizado, un punto más brillante */
-  --color-cobrar-green: #00E87A;
-  --color-cobrar-orange: #FF6B35;
-  --color-cobrar-purple: #7C3AED;
-  --color-cobrar-txt: #F2F2FB;         /* texto principal, casi blanco limpio */
-  --color-cobrar-txt2: #ABABCB;        /* secundario legible (antes #8888AA) */
-  --color-cobrar-txt3: #7C7C99;        /* muteado pero legible ~4.6:1 (antes #44445A, ~2:1) */
-  --color-cobrar-border: rgba(255,255,255,0.11);  /* separación más clara (antes .07) */
+  --color-bg: var(--my-bg);
+  --color-surface: var(--my-surface);
+  --color-surface-2: var(--my-surface2);
+  --color-border: var(--my-border);
+  --color-text: var(--my-text);
+  --color-muted: var(--my-muted);
+  --color-dim: var(--my-dim);
+  --color-brand: var(--my-brand);
+  --color-brand-hover: #00B578;
+  --color-brand-bg: rgba(0,214,143,.08);
+  --color-danger: #FF4D6D;
+  --color-warning: #FFB020;
+  --color-info: #4D9FFF;
 
-  --font-head: "Plus Jakarta Sans", sans-serif;
-  --font-body: "Inter", sans-serif;
+  --font-display: 'Sora', system-ui, sans-serif;
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius-card: 12px;
 }
 
-@layer base {
-  body {
-    background-color: var(--color-cobrar-bg);
-    color: var(--color-cobrar-txt);
-    font-family: var(--font-body);
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-  }
-
-  /* Foco visible y accesible en toda la app (resalta el control activo) */
-  :focus-visible {
-    outline: 2px solid var(--color-cobrar-accent);
-    outline-offset: 2px;
-    border-radius: 6px;
-  }
-  button, [role="button"], a { cursor: pointer; }
-
-  /* Placeholders legibles (antes quedaban demasiado apagados) */
-  ::placeholder { color: var(--color-cobrar-txt3); opacity: 1; }
-
-  /* Scrollbars discretas y oscuras, coherentes con el panel */
-  .custom-scrollbar { scrollbar-width: thin; scrollbar-color: #2A2A3D transparent; }
-  .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
-  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-  .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #2A2A3D; border-radius: 99px; }
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #3A3A55; }
+:root {
+  --my-bg: #E0E8F2;
+  --my-surface: #FFFFFF;
+  --my-surface2: #EEF3F8;
+  --my-border: #C9D6E5;
+  --my-text: #101828;
+  --my-muted: #475467;
+  --my-dim: #98A2B3;
+  --my-brand: #009B65;
+  color-scheme: light;
 }
+
+[data-theme="dark"] {
+  --my-bg: #080C12;
+  --my-surface: #0F1821;
+  --my-surface2: #162030;
+  --my-border: #1C2B3C;
+  --my-text: #C8DCF0;
+  --my-muted: #5A7896;
+  --my-dim: #2E4A62;
+  --my-brand: #00D68F;
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--my-bg);
+  color: var(--my-text);
+  font-family: 'DM Sans', system-ui, sans-serif;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar         { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb   { background: var(--my-border); border-radius: 3px; }
+::-webkit-scrollbar-track   { background: transparent; }
+
+/* View Transitions for Theme Toggle */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Dark -> Light: Old (dark) on top, shrinks */
+::view-transition-old(root) { z-index: 2; }
+::view-transition-new(root) { z-index: 1; }
+
+/* Light -> Dark: New (dark) on top, expands */
+[data-theme="dark"]::view-transition-old(root) { z-index: 1; }
+[data-theme="dark"]::view-transition-new(root) { z-index: 2; }

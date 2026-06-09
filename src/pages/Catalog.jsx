@@ -8,7 +8,7 @@ import './Catalog.css';
 const fmt = (n) => '$' + Number(n).toLocaleString('es-AR');
 
 /* ── category row with horizontal scroll ── */
-function CategoryRow({ title, count, products, cart, onAdd, onRemove }) {
+function CategoryRow({ title, count, products, cart, onAdd, onRemove, onProductClick, onVerTodo }) {
   const ref = useRef(null);
   const scroll = (dir) => ref.current?.scrollBy({ left: dir * 200, behavior: 'smooth' });
 
@@ -16,7 +16,7 @@ function CategoryRow({ title, count, products, cart, onAdd, onRemove }) {
     <section className="cat-section">
       <div className="cat-section-head">
         <h2 className="cat-section-title">{title} <span className="cat-section-count">{count}</span></h2>
-        <button className="cat-section-link">Ver todo →</button>
+        <button className="cat-section-link" onClick={() => onVerTodo(title)}>Ver todo →</button>
       </div>
       <div className="cat-row-wrap">
         <div className="cat-row" ref={ref}>
@@ -24,12 +24,14 @@ function CategoryRow({ title, count, products, cart, onAdd, onRemove }) {
             const inCart = cart.find(c => c.id === p.id);
             return (
               <div key={p.id} className="cat-card">
-                <div className="cat-card-img">{p.icon || '📦'}</div>
-                <button className="cat-card-add" onClick={() => onAdd(p)} aria-label="Agregar">
+                <div className="cat-card-img" onClick={() => onProductClick(p)} style={{ cursor: 'pointer' }}>{p.icon || '📦'}</div>
+                <button className="cat-card-add" onClick={(e) => { e.stopPropagation(); onAdd(p); }} aria-label="Agregar">
                   {inCart ? <span className="cat-card-badge">{inCart.qty}</span> : <Plus size={18} />}
                 </button>
-                <h3 className="cat-card-name">{p.name}</h3>
-                <p className="cat-card-price">{fmt(p.price)}</p>
+                <div onClick={() => onProductClick(p)} style={{ cursor: 'pointer' }}>
+                  <h3 className="cat-card-name">{p.name}</h3>
+                  <p className="cat-card-price">{fmt(p.price)}</p>
+                </div>
               </div>
             );
           })}
@@ -77,6 +79,7 @@ export default function Catalog() {
   const [cartOpen, setCartOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showWaPreview, setShowWaPreview] = useState(true);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   useEffect(() => { fetchData(); }, [slugOrId]);
 
@@ -96,7 +99,7 @@ export default function Catalog() {
       if (s) setStore(s);
       
       // We should ideally filter products by user_id of the store, but for now we keep the current logic
-      const { data: p } = await supabase.from('products').select('*').gt('stock', 0).order('name');
+      const { data: p } = await supabase.from('products').select('*').gt('stock', 0).eq('show_in_store', true).order('name');
       if (p) setProducts(p);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
@@ -222,7 +225,7 @@ export default function Catalog() {
       <main className="cat-main">
         {activeTab === 'Todos' ? (
           Object.entries(grouped).map(([cat, prods]) => (
-            <CategoryRow key={cat} title={cat} count={prods.length} products={prods} cart={cart} onAdd={addToCart} onRemove={removeFromCart} />
+            <CategoryRow key={cat} title={cat} count={prods.length} products={prods} cart={cart} onAdd={addToCart} onRemove={removeFromCart} onProductClick={setSelectedProduct} onVerTodo={setActiveTab} />
           ))
         ) : (
           <div className="cat-grid">
@@ -230,10 +233,12 @@ export default function Catalog() {
               const inCart = cart.find(c => c.id === p.id);
               return (
                 <div key={p.id} className="cat-card">
-                  <div className="cat-card-img">{p.icon || '📦'}</div>
-                  <button className="cat-card-add" onClick={() => addToCart(p)}>{inCart ? <span className="cat-card-badge">{inCart.qty}</span> : <Plus size={18}/>}</button>
-                  <h3 className="cat-card-name">{p.name}</h3>
-                  <p className="cat-card-price">{fmt(p.price)}</p>
+                  <div className="cat-card-img" onClick={() => setSelectedProduct(p)} style={{ cursor: 'pointer' }}>{p.icon || '📦'}</div>
+                  <button className="cat-card-add" onClick={(e) => { e.stopPropagation(); addToCart(p); }}>{inCart ? <span className="cat-card-badge">{inCart.qty}</span> : <Plus size={18}/>}</button>
+                  <div onClick={() => setSelectedProduct(p)} style={{ cursor: 'pointer' }}>
+                    <h3 className="cat-card-name">{p.name}</h3>
+                    <p className="cat-card-price">{fmt(p.price)}</p>
+                  </div>
                 </div>
               );
             })}
@@ -299,6 +304,39 @@ export default function Catalog() {
               <button className="cat-wa-btn" onClick={checkout} disabled={cart.length===0}>
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                 Enviar pedido por WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── PRODUCT MODAL ── */}
+      {selectedProduct && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setSelectedProduct(null)}>
+          <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-[400px] shadow-2xl relative overflow-hidden" onClick={e => e.stopPropagation()}>
+            <button 
+              className="absolute top-4 right-4 text-white hover:text-gray-200 transition-colors z-10 bg-black/30 p-1.5 rounded-full backdrop-blur-md"
+              onClick={() => setSelectedProduct(null)}
+            >
+              <X size={20} />
+            </button>
+            <div className="w-full h-48 bg-gray-50 flex items-center justify-center text-6xl">
+              {selectedProduct.icon || '📦'}
+            </div>
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-2">
+                <h2 className="text-xl font-bold text-gray-900">{selectedProduct.name}</h2>
+                <span className="text-lg font-bold text-blue-500">{fmt(selectedProduct.price)}</span>
+              </div>
+              <p className="text-sm text-gray-500 mb-6">
+                {selectedProduct.description || 'Sin descripción detallada.'}
+              </p>
+              
+              <button 
+                onClick={() => { addToCart(selectedProduct); setSelectedProduct(null); }}
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg flex justify-center items-center gap-2"
+              >
+                <Plus size={18} /> Agregar al carrito
               </button>
             </div>
           </div>

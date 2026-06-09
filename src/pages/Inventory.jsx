@@ -374,20 +374,20 @@ export default function Inventory() {
     <div className="flex flex-col h-full p-4 md:p-8 overflow-hidden">
       <div className="flex flex-col gap-3 lg:flex-row lg:justify-between lg:items-center mb-8 shrink-0">
         <div>
-          <h2 className="font-head font-bold text-2xl text-white">Inventario</h2>
-          <p className="text-cobrar-txt2 text-sm mt-1">Gestiona tus productos y controla el stock</p>
+          <h2 className="font-display font-bold text-2xl text-text">Inventario</h2>
+          <p className="text-muted text-sm mt-1">Gestiona tus productos y controla el stock</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
           <button 
             onClick={() => setShowImportModal(true)}
-            className="w-full sm:w-auto justify-center bg-[#1a1a23] border border-cobrar-border text-white hover:bg-cobrar-bg2 font-bold py-2.5 px-4 rounded-xl transition-all text-sm flex items-center gap-2"
+            className="w-full sm:w-auto justify-center bg-surface-2 border border-border text-text hover:bg-surface font-bold py-2.5 px-4 rounded-xl transition-all text-sm flex items-center gap-2"
           >
             <Upload size={16} />
             Importar CSV
           </button>
           <button 
             onClick={handleExportCSV}
-            className="w-full sm:w-auto justify-center bg-[#1a1a23] border border-cobrar-border text-white hover:bg-cobrar-bg2 font-bold py-2.5 px-4 rounded-xl transition-all text-sm flex items-center gap-2"
+            className="w-full sm:w-auto justify-center bg-surface-2 border border-border text-text hover:bg-surface font-bold py-2.5 px-4 rounded-xl transition-all text-sm flex items-center gap-2"
           >
             <Download size={16} />
             Exportar CSV
@@ -400,7 +400,7 @@ export default function Inventory() {
                 window.location.href = '/inventory/new';
               }
             }}
-            className="w-full sm:w-auto justify-center bg-cobrar-green text-black font-bold py-2.5 px-5 rounded-xl hover:bg-[#05FF88] transition-all text-sm flex items-center gap-2 shrink-0"
+            className="w-full sm:w-auto justify-center bg-brand text-black font-bold py-2.5 px-5 rounded-xl hover:bg-[#05FF88] transition-all text-sm flex items-center gap-2 shrink-0"
           >
             <Plus size={18} />
             Nuevo Producto
@@ -408,22 +408,22 @@ export default function Inventory() {
         </div>
       </div>
       
-      <div className="flex-1 bg-cobrar-bg3 border border-cobrar-border rounded-2xl flex flex-col overflow-hidden">
+      <div className="flex-1 bg-surface-2 border border-border rounded-2xl flex flex-col overflow-hidden">
         {/* Toolbar */}
-        <div className="p-4 border-b border-cobrar-border bg-cobrar-bg2 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center shrink-0">
+        <div className="p-4 border-b border-border bg-surface flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center shrink-0">
           <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-cobrar-txt2" size={18} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
             <input 
               type="text" 
               placeholder="Buscar producto por nombre o código..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-cobrar-bg border border-cobrar-border rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-cobrar-green/50 transition-colors"
+              className="w-full bg-bg border border-border rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-cobrar-green/50 transition-colors"
             />
           </div>
-          <div className="text-sm text-cobrar-txt2 flex flex-col items-end">
+          <div className="text-sm text-muted flex flex-col items-end">
             <div>
-              <span className="font-bold text-white">{filteredProducts.length}</span> / {plan.maxProducts.toLocaleString('es-AR')} productos
+              <span className="font-bold text-text">{filteredProducts.length}</span> / {plan.maxProducts.toLocaleString('es-AR')} productos
             </div>
             {products.length >= plan.maxProducts && (
               <span className="text-xs text-[#ff5252] font-bold">Límite alcanzado</span>
@@ -434,36 +434,36 @@ export default function Inventory() {
         {/* Table */}
         <div className="flex-1 overflow-auto">
           <table className="w-full min-w-[640px] text-left border-collapse">
-            <thead className="bg-cobrar-bg2 sticky top-0 z-10">
+            <thead className="bg-surface sticky top-0 z-10">
               <tr>
-                <th className="p-4 font-head font-semibold text-xs tracking-wider text-cobrar-txt2 uppercase border-b border-cobrar-border">Icono</th>
-                <th className="p-4 font-head font-semibold text-xs tracking-wider text-cobrar-txt2 uppercase border-b border-cobrar-border">Producto</th>
-                <th className="p-4 font-head font-semibold text-xs tracking-wider text-cobrar-txt2 uppercase border-b border-cobrar-border">Código</th>
-                <th className="p-4 font-head font-semibold text-xs tracking-wider text-cobrar-txt2 uppercase border-b border-cobrar-border text-right">Precio</th>
-                <th className="p-4 font-head font-semibold text-xs tracking-wider text-cobrar-txt2 uppercase border-b border-cobrar-border text-center">Stock</th>
-                <th className="p-4 font-head font-semibold text-xs tracking-wider text-cobrar-txt2 uppercase border-b border-cobrar-border text-center">Estado</th>
-                <th className="p-4 font-head font-semibold text-xs tracking-wider text-cobrar-txt2 uppercase border-b border-cobrar-border text-right">Acciones</th>
+                <th className="p-4 font-display font-semibold text-xs tracking-wider text-muted uppercase border-b border-border">Icono</th>
+                <th className="p-4 font-display font-semibold text-xs tracking-wider text-muted uppercase border-b border-border">Producto</th>
+                <th className="p-4 font-display font-semibold text-xs tracking-wider text-muted uppercase border-b border-border">Código</th>
+                <th className="p-4 font-display font-semibold text-xs tracking-wider text-muted uppercase border-b border-border text-right">Precio</th>
+                <th className="p-4 font-display font-semibold text-xs tracking-wider text-muted uppercase border-b border-border text-center">Stock</th>
+                <th className="p-4 font-display font-semibold text-xs tracking-wider text-muted uppercase border-b border-border text-center">Disponible</th>
+                <th className="p-4 font-display font-semibold text-xs tracking-wider text-muted uppercase border-b border-border text-right">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-cobrar-border">
+            <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="6" className="p-8 text-center text-cobrar-green">
+                  <td colSpan="6" className="p-8 text-center text-brand">
                     <Loader2 className="animate-spin mx-auto" size={24} />
                   </td>
                 </tr>
               ) : filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="p-12 text-center text-cobrar-txt3">
+                  <td colSpan="7" className="p-12 text-center text-dim">
                     <Package size={32} className="mx-auto mb-3 opacity-50" />
                     No hay productos para mostrar
                   </td>
                 </tr>
               ) : (
-                filteredProducts.map(prod => (
-                  <tr key={prod.id} className={`hover:bg-cobrar-bg2/50 transition-colors group ${prod.active === false ? 'opacity-50' : ''}`}>
+                filteredProducts.slice(0, 100).map(prod => (
+                  <tr key={prod.id} className={`border-b border-border/50 hover:bg-surface transition-colors group ${prod.active === false ? 'opacity-50' : ''}`}>
                     <td className="p-4">
-                      <div className="w-10 h-10 bg-cobrar-bg rounded-lg border border-cobrar-border flex items-center justify-center text-xl overflow-hidden shrink-0">
+                      <div className="w-10 h-10 bg-bg rounded-lg border border-border flex items-center justify-center text-xl overflow-hidden shrink-0">
                         {prod.icon?.startsWith('http') ? (
                           <img src={prod.icon} alt={prod.name} className="w-full h-full object-cover" />
                         ) : (
@@ -471,7 +471,7 @@ export default function Inventory() {
                         )}
                       </div>
                     </td>
-                    <td className="p-4 font-medium text-white">
+                    <td className="p-4 font-medium text-text">
                       <div className="flex items-center gap-2">
                         {prod.name}
                         {plan.hasLowRotationAlerts && prod.stock > 0 && new Date() - new Date(prod.updated_at || prod.created_at || Date.now()) > 30*24*60*60*1000 && (
@@ -481,10 +481,10 @@ export default function Inventory() {
                         )}
                       </div>
                     </td>
-                    <td className="p-4 text-cobrar-txt2 text-sm">{prod.code || '-'}</td>
-                    <td className="p-4 text-right font-bold text-cobrar-green whitespace-nowrap">${prod.price.toLocaleString('es-AR')}</td>
+                    <td className="p-4 text-muted text-sm">{prod.code || '-'}</td>
+                    <td className="p-4 text-right font-bold text-brand whitespace-nowrap">${prod.price.toLocaleString('es-AR')}</td>
                     <td className="p-4 text-center">
-                      <span className={`inline-block px-2.5 py-1 rounded-md text-xs font-bold ${prod.stock < 10 ? 'bg-cobrar-orange/20 text-cobrar-orange' : 'bg-cobrar-bg text-cobrar-txt2 border border-cobrar-border'}`}>
+                      <span className={`inline-block px-2.5 py-1 rounded-md text-xs font-bold ${prod.stock < 10 ? 'bg-cobrar-orange/20 text-warning' : 'bg-bg text-muted border border-border'}`}>
                         {prod.stock}
                       </span>
                     </td>
@@ -493,7 +493,7 @@ export default function Inventory() {
                         onClick={() => handleToggleActive(prod)}
                         title={prod.active === false ? 'Activar producto' : 'Desactivar producto'}
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                          prod.active !== false ? 'bg-cobrar-green' : 'bg-cobrar-border'
+                          prod.active !== false ? 'bg-brand' : 'bg-cobrar-border'
                         }`}
                       >
                         <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -503,10 +503,10 @@ export default function Inventory() {
                     </td>
                     <td className="p-4 text-right">
                       <div className="flex justify-end gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => handleEditClick(prod)} className="p-2 text-cobrar-txt2 hover:text-white hover:bg-cobrar-bg rounded-lg transition-colors">
+                        <button onClick={() => handleEditClick(prod)} className="p-2 text-muted hover:text-text hover:bg-bg rounded-lg transition-colors">
                           <Edit2 size={16} />
                         </button>
-                        <button className="p-2 text-cobrar-txt2 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors">
+                        <button className="p-2 text-muted hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors">
                           <Trash2 size={16} />
                         </button>
                       </div>
@@ -522,16 +522,16 @@ export default function Inventory() {
       {/* ── CSV IMPORT MODAL ── */}
       {showImportModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#12121a] border border-cobrar-border rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+          <div className="bg-bg border border-border rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
             {/* Modal Header */}
-            <div className="p-5 border-b border-cobrar-border flex justify-between items-start">
+            <div className="p-5 border-b border-border flex justify-between items-start">
               <div>
-                <h3 className="text-lg font-bold text-white">Importar Productos desde CSV</h3>
-                <p className="text-xs text-cobrar-txt2 mt-1">Sube un archivo CSV para importar productos masivamente. Puedes actualizar productos existentes o crear nuevos.</p>
+                <h3 className="text-lg font-bold text-text">Importar Productos desde CSV</h3>
+                <p className="text-xs text-muted mt-1">Sube un archivo CSV para importar productos masivamente. Puedes actualizar productos existentes o crear nuevos.</p>
               </div>
               <button 
                 onClick={() => { setShowImportModal(false); setSelectedFile(null); }}
-                className="text-cobrar-txt2 hover:text-white p-1 rounded-lg hover:bg-cobrar-bg transition-colors"
+                className="text-muted hover:text-text p-1 rounded-lg hover:bg-bg transition-colors"
               >
                 <X size={20} />
               </button>
@@ -539,15 +539,15 @@ export default function Inventory() {
 
             <form onSubmit={handleImportCSV} className="p-5 space-y-5">
               {/* Template download card */}
-              <div className="bg-[#181824] border border-[#ff5252]/10 p-4 rounded-xl flex items-center justify-between">
+              <div className="bg-surface-2 border border-border p-4 rounded-xl flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-bold text-white">¿Necesitas una plantilla?</h4>
-                  <p className="text-xs text-cobrar-txt2 mt-0.5">Descarga un archivo CSV de ejemplo con el formato correcto</p>
+                  <h4 className="text-sm font-bold text-text">¿Necesitas una plantilla?</h4>
+                  <p className="text-xs text-muted mt-0.5">Descarga un archivo CSV de ejemplo con el formato correcto</p>
                 </div>
                 <button
                   type="button"
                   onClick={handleDownloadTemplate}
-                  className="bg-[#242436] hover:bg-[#2c2c42] border border-cobrar-border text-white text-xs font-bold py-2 px-4 rounded-lg flex items-center gap-1.5 transition-colors shrink-0"
+                  className="bg-surface hover:bg-bg border border-border text-text text-xs font-bold py-2 px-4 rounded-lg flex items-center gap-1.5 transition-colors shrink-0"
                 >
                   <Download size={14} />
                   Descargar Plantilla
@@ -556,8 +556,8 @@ export default function Inventory() {
 
               {/* File Input */}
               <div>
-                <label className="block text-sm font-bold text-white mb-2">Archivo CSV</label>
-                <div className="bg-[#181824] border border-cobrar-border rounded-xl p-4 flex flex-col items-center justify-center border-dashed hover:border-cobrar-green/30 transition-colors relative">
+                <label className="block text-sm font-bold text-text mb-2">Archivo CSV</label>
+                <div className="bg-surface-2 border border-border rounded-xl p-4 flex flex-col items-center justify-center border-dashed hover:border-brand/30 transition-colors relative">
                   <input
                     type="file"
                     accept=".csv"
@@ -565,35 +565,35 @@ export default function Inventory() {
                     onChange={(e) => setSelectedFile(e.target.files[0])}
                     className="absolute inset-0 opacity-0 cursor-pointer"
                   />
-                  <Upload className="text-cobrar-txt3 mb-2" size={24} />
-                  <span className="text-sm text-white font-medium">
+                  <Upload className="text-dim mb-2" size={24} />
+                  <span className="text-sm text-text font-medium">
                     {selectedFile ? selectedFile.name : 'Haz clic o arrastra tu archivo aquí'}
                   </span>
-                  <span className="text-xs text-cobrar-txt2 mt-1">Solo archivos .csv</span>
+                  <span className="text-xs text-muted mt-1">Solo archivos .csv</span>
                 </div>
               </div>
 
               {/* Expected Format Alert */}
-              <div className="bg-[#181824] border border-cobrar-border p-4 rounded-xl text-xs text-cobrar-txt2 space-y-1.5 max-h-48 overflow-y-auto">
-                <strong className="text-white block text-sm mb-1">Formato esperado:</strong>
-                <p>El archivo debe contener las columnas: <span className="text-white font-semibold">Código, Nombre (requerido), Tipo (simple/combo), Categoría, Proveedor, Precio Costo, Precio Neto, Precio Bruto, IVA, Unidad, Imagen, Vencimiento, Stock Actual, Alerta Stock, Activo (SI/NO), Variantes y Componentes</span>.</p>
-                <p>Las variantes se cargan como <span className="text-white">Nombre | Código | Stock</span> separadas por punto y coma.</p>
-                <p>Los componentes se cargan como <span className="text-white">Producto | Variante | Cantidad</span> (usando código o nombre), separados por punto y coma.</p>
+              <div className="bg-surface-2 border border-border p-4 rounded-xl text-xs text-muted space-y-1.5 max-h-48 overflow-y-auto">
+                <strong className="text-text block text-sm mb-1">Formato esperado:</strong>
+                <p>El archivo debe contener las columnas: <span className="text-text font-semibold">Código, Nombre (requerido), Tipo (simple/combo), Categoría, Proveedor, Precio Costo, Precio Neto, Precio Bruto, IVA, Unidad, Imagen, Vencimiento, Stock Actual, Alerta Stock, Activo (SI/NO), Variantes y Componentes</span>.</p>
+                <p>Las variantes se cargan como <span className="text-text">Nombre | Código | Stock</span> separadas por punto y coma.</p>
+                <p>Los componentes se cargan como <span className="text-text">Producto | Variante | Cantidad</span> (usando código o nombre), separados por punto y coma.</p>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-end gap-3 pt-3 border-t border-cobrar-border">
+              <div className="flex justify-end gap-3 pt-3 border-t border-border">
                 <button
                   type="button"
                   onClick={() => { setShowImportModal(false); setSelectedFile(null); }}
-                  className="bg-transparent hover:bg-cobrar-bg border border-cobrar-border text-white text-sm font-bold py-2.5 px-5 rounded-xl transition-colors"
+                  className="bg-transparent hover:bg-bg border border-border text-text text-sm font-bold py-2.5 px-5 rounded-xl transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={importing || !selectedFile}
-                  className="bg-[#5252ff] hover:bg-[#6666ff] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold py-2.5 px-6 rounded-xl flex items-center gap-2 transition-all shadow-[0_4px_15px_rgba(82,82,255,0.15)]"
+                  className="bg-brand hover:bg-brand-hover disabled:opacity-50 disabled:cursor-not-allowed text-text text-sm font-bold py-2.5 px-6 rounded-xl flex items-center gap-2 transition-all shadow-[0_4px_15px_rgba(82,82,255,0.15)]"
                 >
                   {importing ? <Loader2 className="animate-spin" size={16} /> : <Upload size={16} />}
                   Importar Productos
@@ -607,12 +607,12 @@ export default function Inventory() {
       {/* ── EDIT PRODUCT MODAL ── */}
       {showEditModal && editingProduct && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#12121a] border border-cobrar-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
-            <div className="p-5 border-b border-cobrar-border flex justify-between items-center bg-cobrar-bg2">
-              <h3 className="text-lg font-bold text-white">Editar Producto</h3>
+          <div className="bg-bg border border-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="p-5 border-b border-border flex justify-between items-center bg-surface">
+              <h3 className="text-lg font-bold text-text">Editar Producto</h3>
               <button 
                 onClick={() => setShowEditModal(false)}
-                className="text-cobrar-txt2 hover:text-white p-1 rounded-lg transition-colors"
+                className="text-muted hover:text-text p-1 rounded-lg transition-colors"
               >
                 <X size={20} />
               </button>
@@ -621,21 +621,21 @@ export default function Inventory() {
             <form onSubmit={handleEditSubmit} className="p-5 space-y-4">
               <div className="flex gap-4">
                 <div className="w-16 shrink-0 flex flex-col gap-2">
-                  <label className="block text-xs font-bold text-cobrar-txt2 mb-0 text-center" title="Pega un Emoji o una URL de imagen">Imagen</label>
-                  <div className="relative group w-16 h-16 bg-[#1a1a23] border border-dashed border-cobrar-border hover:border-[#5252ff]/50 rounded-lg flex items-center justify-center overflow-hidden cursor-pointer transition-colors">
+                  <label className="block text-xs font-bold text-muted mb-0 text-center" title="Pega un Emoji o una URL de imagen">Imagen</label>
+                  <div className="relative group w-16 h-16 bg-surface-2 border border-dashed border-border hover:border-brand/50 rounded-lg flex items-center justify-center overflow-hidden cursor-pointer transition-colors">
                     {isUploading ? (
-                      <Loader2 size={20} className="text-[#5252ff] animate-spin" />
+                      <Loader2 size={20} className="text-brand animate-spin" />
                     ) : editingProduct.icon?.startsWith('http') ? (
                       <>
                         <img src={editingProduct.icon} alt="Preview" className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                           <Upload size={16} className="text-white" />
+                           <Upload size={16} className="text-text" />
                         </div>
                       </>
                     ) : (
                       <div className="flex flex-col items-center mt-1">
                         <span className="text-2xl mb-1 leading-none">{editingProduct.icon || '📦'}</span>
-                        <span className="text-[8px] text-cobrar-txt2 uppercase font-bold tracking-wider opacity-0 group-hover:opacity-100 absolute bottom-1">Subir</span>
+                        <span className="text-[8px] text-muted uppercase font-bold tracking-wider opacity-0 group-hover:opacity-100 absolute bottom-1">Subir</span>
                       </div>
                     )}
                     <input 
@@ -653,24 +653,24 @@ export default function Inventory() {
                     onChange={(e) => setEditingProduct({...editingProduct, icon: e.target.value})}
                     placeholder="o Emoji"
                     maxLength={2}
-                    className="w-16 bg-[#1a1a23] border border-cobrar-border rounded-lg py-1 px-1 text-center text-[10px] text-white focus:outline-none focus:border-[#5252ff]"
+                    className="w-16 bg-surface-2 border border-border rounded-lg py-1 px-1 text-center text-[10px] text-text focus:outline-none focus:border-brand"
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-xs font-bold text-cobrar-txt2 mb-1">Nombre</label>
+                  <label className="block text-xs font-bold text-muted mb-1">Nombre</label>
                   <input
                     type="text"
                     value={editingProduct.name}
                     onChange={(e) => setEditingProduct({...editingProduct, name: e.target.value})}
                     required
-                    className="w-full bg-[#1a1a23] border border-cobrar-border rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-[#5252ff]"
+                    className="w-full bg-surface-2 border border-border rounded-lg p-2.5 text-sm text-text focus:outline-none focus:border-brand"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-cobrar-txt2 mb-1">Precio ($)</label>
+                  <label className="block text-xs font-bold text-muted mb-1">Precio ($)</label>
                   <input
                     type="number"
                     min="0"
@@ -678,27 +678,27 @@ export default function Inventory() {
                     value={editingProduct.price}
                     onChange={(e) => setEditingProduct({...editingProduct, price: e.target.value})}
                     required
-                    className="w-full bg-[#1a1a23] border border-cobrar-border rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-[#5252ff]"
+                    className="w-full bg-surface-2 border border-border rounded-lg p-2.5 text-sm text-text focus:outline-none focus:border-brand"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-cobrar-txt2 mb-1">Stock Actual</label>
+                  <label className="block text-xs font-bold text-muted mb-1">Stock Actual</label>
                   <input
                     type="number"
                     value={editingProduct.stock}
                     onChange={(e) => setEditingProduct({...editingProduct, stock: e.target.value})}
                     required
-                    className="w-full bg-[#1a1a23] border border-cobrar-border rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-[#5252ff]"
+                    className="w-full bg-surface-2 border border-border rounded-lg p-2.5 text-sm text-text focus:outline-none focus:border-brand"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-cobrar-txt2 mb-1">Proveedor</label>
+                <label className="block text-xs font-bold text-muted mb-1">Proveedor</label>
                 <select
                   value={editingProduct.provider_id || ''}
                   onChange={(e) => setEditingProduct({...editingProduct, provider_id: e.target.value})}
-                  className="w-full bg-[#1a1a23] border border-cobrar-border rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-[#5252ff] appearance-none"
+                  className="w-full bg-surface-2 border border-border rounded-lg p-2.5 text-sm text-text focus:outline-none focus:border-brand appearance-none"
                 >
                   <option value="">-- Sin proveedor --</option>
                   {providers.map(p => (
@@ -707,18 +707,18 @@ export default function Inventory() {
                 </select>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-cobrar-border">
+              <div className="flex justify-end gap-3 pt-4 border-t border-border">
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="bg-transparent hover:bg-cobrar-bg border border-transparent hover:border-cobrar-border text-white text-sm py-2 px-4 rounded-lg transition-colors"
+                  className="bg-transparent hover:bg-bg border border-transparent hover:border-border text-text text-sm py-2 px-4 rounded-lg transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="bg-[#5252ff] hover:bg-[#6666ff] disabled:opacity-50 text-white font-bold py-2 px-6 rounded-lg flex items-center gap-2 transition-all shadow-[0_4px_15px_rgba(82,82,255,0.15)]"
+                  className="bg-brand hover:bg-brand-hover disabled:opacity-50 text-text font-bold py-2 px-6 rounded-lg flex items-center gap-2 transition-all shadow-[0_4px_15px_rgba(82,82,255,0.15)]"
                 >
                   {isSaving ? <Loader2 className="animate-spin" size={16} /> : <Edit2 size={16} />}
                   Guardar

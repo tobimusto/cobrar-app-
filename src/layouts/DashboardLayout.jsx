@@ -1,19 +1,23 @@
 import { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { enqueueOfflineAction } from '../lib/offlineSync';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import { useTheme } from '../context/ThemeContext';
 import { 
   MonitorSmartphone, ShoppingBag, 
   Package, ArrowLeftRight, 
   Users, UserCog, 
   BarChart3, 
   Settings, HelpCircle,
-  LogOut, Wallet, ChevronDown, ChevronUp, Check, X, ArrowUpCircle, ArrowDownCircle, Calculator, Menu, Truck, Globe, User, Shield
+  LogOut, Wallet, ChevronDown, ChevronUp, Check, X, ArrowUpCircle, ArrowDownCircle, Calculator, Menu, Truck, Globe, User, Shield,
+  Sun, Moon
 } from 'lucide-react';
 
 export default function DashboardLayout() {
   const { user, profile, owner_id, signOut } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -38,13 +42,26 @@ export default function DashboardLayout() {
     { name: 'Clientes', path: '/clients', icon: Users, roles: ['Gerente', 'Empleado PLUS', 'Empleado'] },
   ];
   const [showCashModal, setShowCashModal] = useState(false);
-  const [cashAmount, setCashAmount] = useState(0);
   const [cashAction, setCashAction] = useState(null); // 'ingresar', 'retirar', 'cerrar', 'abrir'
   const [inputValue, setInputValue] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
-  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [isRegisterOpen, setIsRegisterOpen] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('cobrar_is_register_open')) || false;
+    } catch {
+      return false;
+    }
+  });
+  const [cashAmount, setCashAmount] = useState(() => {
+    try {
+      return Number(localStorage.getItem('cobrar_cash_amount')) || 0;
+    } catch {
+      return 0;
+    }
+  });
   const [showReminder, setShowReminder] = useState(false);
   const [reminderMessage, setReminderMessage] = useState('');
+  const [businessHours, setBusinessHours] = useState({ opening: '08:00', closing: '20:00' });
 
   useEffect(() => {
     if (user) {
@@ -63,6 +80,20 @@ export default function DashboardLayout() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  useEffect(() => {
+    const fetchHours = async () => {
+      if (!owner_id) return;
+      const { data } = await supabase.from('store_settings').select('business_hours').eq('user_id', owner_id).single();
+      if (data && data.business_hours) {
+        setBusinessHours({
+          opening: data.business_hours.opening || '08:00',
+          closing: data.business_hours.closing || '20:00'
+        });
+      }
+    };
+    fetchHours();
+  }, [owner_id]);
+
   // Close help menu when clicking outside
   useEffect(() => {
     if (!showHelpMenu) return;
@@ -79,8 +110,8 @@ export default function DashboardLayout() {
       const currentMinutes = now.getMinutes();
       const currentTime = currentHours + (currentMinutes / 60);
 
-      const openingTimeStr = localStorage.getItem('cobrar_opening_time') || '08:00';
-      const closingTimeStr = localStorage.getItem('cobrar_closing_time') || '20:00';
+      const openingTimeStr = businessHours.opening;
+      const closingTimeStr = businessHours.closing;
 
       const [openH, openM] = openingTimeStr.split(':').map(Number);
       const [closeH, closeM] = closingTimeStr.split(':').map(Number);
@@ -102,9 +133,17 @@ export default function DashboardLayout() {
     checkTime();
     const interval = setInterval(checkTime, 60000); // Check every minute
     return () => clearInterval(interval);
-  }, [isRegisterOpen]);
+  }, [isRegisterOpen, businessHours]);
+
+  useEffect(() => {
+    localStorage.setItem('cobrar_is_register_open', JSON.stringify(isRegisterOpen));
+    localStorage.setItem('cobrar_cash_amount', cashAmount.toString());
+  }, [isRegisterOpen, cashAmount]);
 
   const fetchCashStatus = async () => {
+    if (!owner_id) return;
+    if (!navigator.onLine) return; // Si no hay internet, confiamos en el localStorage
+
     try {
       const { data, error } = await supabase
         .from('cash_movements')
@@ -222,7 +261,7 @@ export default function DashboardLayout() {
     }
 
     try {
-      const { error } = await supabase.from('cash_movements').insert([{
+      const payload = {
         user_id: owner_id,
         employee_id: user.id,
         tipo: cashAction === 'abrir' ? 'apertura' : cashAction,
@@ -230,9 +269,14 @@ export default function DashboardLayout() {
         motivo: cashAction === 'ingresar' ? 'Ingreso manual' : cashAction === 'retirar' ? 'Retiro manual' : 'Monto inicial en caja',
         saldo_anterior: cashAmount,
         saldo_nuevo: newAmount
-      }]);
+      };
 
-      if (error) throw error;
+      if (!navigator.onLine) {
+        enqueueOfflineAction('CASH_MOVEMENT', payload);
+      } else {
+        const { error } = await supabase.from('cash_movements').insert([payload]);
+        if (error) throw error;
+      }
 
       setCashAmount(newAmount);
       if (cashAction === 'abrir') setIsRegisterOpen(true);
@@ -249,7 +293,7 @@ export default function DashboardLayout() {
 
   const handleCloseRegister = async () => {
     try {
-      const { error } = await supabase.from('cash_movements').insert([{
+      const payload = {
         user_id: owner_id,
         employee_id: user.id,
         tipo: 'cierre',
@@ -257,9 +301,14 @@ export default function DashboardLayout() {
         motivo: 'Cierre de turno',
         saldo_anterior: cashAmount,
         saldo_nuevo: 0
-      }]);
+      };
 
-      if (error) throw error;
+      if (!navigator.onLine) {
+        enqueueOfflineAction('CASH_MOVEMENT', payload);
+      } else {
+        const { error } = await supabase.from('cash_movements').insert([payload]);
+        if (error) throw error;
+      }
 
       setIsRegisterOpen(false);
       setCashAmount(0);
@@ -273,19 +322,19 @@ export default function DashboardLayout() {
   };
 
   return (
-    <div className="flex h-screen bg-cobrar-bg text-cobrar-txt font-body overflow-hidden">
+    <div className="flex h-screen bg-bg text-text font-sans overflow-hidden">
       {/* Overlay (mobile) */}
       {mobileOpen && (
         <div onClick={closeMobile} aria-hidden="true" className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden" />
       )}
       {/* Sidebar / Drawer */}
-      <aside className={`w-[min(84vw,18rem)] lg:w-64 bg-cobrar-bg2 border-r border-cobrar-border flex flex-col shrink-0 fixed lg:static inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-out ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
+      <aside className={`w-[min(84vw,18rem)] lg:w-64 bg-[#1C3654] border-r border-[#152840] flex flex-col shrink-0 fixed lg:static inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-out ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
         
         {/* Business Selector Top */}
         <div className="p-4 relative">
           <button 
             onClick={() => setShowBusinessMenu(!showBusinessMenu)}
-            className={`w-full flex items-center justify-between p-3 rounded-xl transition-all text-left border ${showBusinessMenu ? 'bg-[#5252ff] border-[#5252ff]' : 'bg-[#5252ff]/10 border-[#5252ff]/20 hover:bg-[#5252ff]/20'}`}
+            className={`w-full flex items-center justify-between p-3 rounded-xl transition-all text-left border-transparent bg-[#152840]/50 hover:bg-[#152840] shadow-sm`}
           >
             <div className="flex items-center gap-3">
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden shrink-0`}>
@@ -295,30 +344,30 @@ export default function DashboardLayout() {
                 </svg>
               </div>
               <div className="flex flex-col">
-                <span className={`font-bold text-sm leading-tight ${showBusinessMenu ? 'text-white' : 'text-white'}`}>Cobrar Pos</span>
-                <span className={`text-[10px] leading-tight ${showBusinessMenu ? 'text-white/80' : 'text-cobrar-txt2'}`}>#De91 - Propietario</span>
+                <span className={`font-bold text-sm leading-tight text-white`}>Cobrar Pos</span>
+                <span className={`text-[10px] leading-tight text-white/70`}>#De91 - Propietario</span>
               </div>
             </div>
-            {showBusinessMenu ? <ChevronUp size={16} className="text-white/80" /> : <ChevronDown size={16} className="text-cobrar-txt2" />}
+            {showBusinessMenu ? <ChevronUp size={16} className="text-white/80" /> : <ChevronDown size={16} className="text-white/50" />}
           </button>
 
           {/* Business Dropdown */}
           {showBusinessMenu && (
-            <div className="absolute top-full left-4 right-4 mt-2 bg-cobrar-bg3 border border-cobrar-border rounded-xl shadow-2xl overflow-hidden z-50">
-              <div className="p-3 border-b border-cobrar-border">
+            <div className="absolute top-full left-4 right-4 mt-2 bg-surface-2 border border-border rounded-xl shadow-2xl overflow-hidden z-50">
+              <div className="p-3 border-b border-border">
                 <div className="relative">
-                  <MonitorSmartphone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-cobrar-txt2" />
+                  <MonitorSmartphone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
                   <input 
                     type="text" 
                     placeholder="Buscar negocio..." 
-                    className="w-full bg-cobrar-bg border border-cobrar-border rounded-lg py-1.5 pl-8 pr-3 text-xs text-white focus:outline-none focus:border-[#5252ff]"
+                    className="w-full bg-bg border border-border rounded-lg py-1.5 pl-8 pr-3 text-xs text-text focus:outline-none focus:border-brand"
                   />
                 </div>
               </div>
               <div className="max-h-48 overflow-y-auto p-2">
-                <button className="w-full flex items-center justify-between p-2 rounded-lg bg-cobrar-bg2 border border-[#5252ff]/30 text-left">
+                <button className="w-full flex items-center justify-between p-2 rounded-lg bg-surface border border-brand/30 text-left">
                   <div className="flex items-center gap-3">
-                    <Check size={14} className="text-[#5252ff] shrink-0" />
+                    <Check size={14} className="text-brand shrink-0" />
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden shrink-0">
                       <svg viewBox="0 0 64 64" fill="none" className="w-full h-full">
                         <rect width="64" height="64" rx="17" fill="#2563EB"/>
@@ -326,8 +375,8 @@ export default function DashboardLayout() {
                       </svg>
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <span className="font-bold text-white text-sm truncate">Cobrar Pos</span>
-                      <span className="text-cobrar-txt2 text-[10px] truncate">#De91 - Propietario</span>
+                      <span className="font-bold text-text text-sm truncate">Cobrar Pos</span>
+                      <span className="text-muted text-[10px] truncate">#De91 - Propietario</span>
                     </div>
                   </div>
                 </button>
@@ -340,7 +389,7 @@ export default function DashboardLayout() {
           <div className="space-y-6">
             {filteredMenuGroups.map((group, i) => (
             <div key={i}>
-              <h3 className="text-[10px] font-head font-bold tracking-widest text-cobrar-txt3 uppercase mb-2 px-3">
+              <h3 className="text-[10px] font-display font-bold tracking-widest text-white/40 uppercase mb-2 px-3">
                 {group.title}
               </h3>
               <div className="space-y-1">
@@ -356,7 +405,7 @@ export default function DashboardLayout() {
                         href={item.path}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-medium text-[13px] text-cobrar-txt2 hover:bg-cobrar-bg3 hover:text-white"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-medium text-[13px] text-white/70 hover:bg-[#152840] hover:text-white"
                       >
                         <Icon size={16} className="opacity-70" />
                         {item.name}
@@ -370,7 +419,7 @@ export default function DashboardLayout() {
                       <div key={item.name} className="flex flex-col">
                         <button
                           onClick={() => toggleMenu(item.name)}
-                          className="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all font-medium text-[13px] text-cobrar-txt2 hover:bg-cobrar-bg3 hover:text-white"
+                          className="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all font-medium text-[13px] text-white/70 hover:bg-[#152840] hover:text-white"
                         >
                           <div className="flex items-center gap-3">
                             <Icon size={16} className="opacity-70" />
@@ -379,7 +428,7 @@ export default function DashboardLayout() {
                           {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                         </button>
                         {isOpen && (
-                          <div className="ml-5 pl-4 border-l border-[#2A2A4A] mt-1 space-y-1 flex flex-col">
+                          <div className="ml-5 pl-4 border-l border-border mt-1 space-y-1 flex flex-col">
                             {item.subItems.map(sub => {
                               const isSubActive = location.pathname === '/settings' && location.search === `?tab=${sub.name}`;
                               const isSubExternal = sub.path.startsWith('http');
@@ -391,7 +440,7 @@ export default function DashboardLayout() {
                                     href={sub.path}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="py-2 px-3 rounded-lg text-[13px] transition-colors text-cobrar-txt3 hover:text-white hover:bg-cobrar-bg3"
+                                    className="py-2 px-3 rounded-lg text-[13px] transition-colors text-white/50 hover:text-white hover:bg-[#152840]"
                                   >
                                     {sub.name}
                                   </a>
@@ -402,7 +451,7 @@ export default function DashboardLayout() {
                                 <Link
                                   key={sub.name}
                                   to={sub.path}
-                                  className={`py-2 px-3 rounded-lg text-[13px] transition-colors ${isSubActive ? 'text-white font-bold bg-[#5252ff]/10' : 'text-cobrar-txt3 hover:text-white hover:bg-cobrar-bg3'}`}
+                                  className={`py-2 px-3 rounded-lg text-[13px] transition-colors ${isSubActive ? 'text-white font-bold bg-[#152840]' : 'text-white/50 hover:text-white hover:bg-[#152840]'}`}
                                 >
                                   {sub.name}
                                 </Link>
@@ -420,11 +469,11 @@ export default function DashboardLayout() {
                       to={item.path}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-medium text-[13px] ${
                         isActive 
-                          ? 'bg-[#5252ff]/10 text-[#5252ff]' 
-                          : 'text-cobrar-txt2 hover:bg-cobrar-bg3 hover:text-white'
+                          ? 'bg-[#152840] text-brand' 
+                          : 'text-white/70 hover:bg-[#152840] hover:text-white'
                       }`}
                     >
-                      <Icon size={16} className={isActive ? 'text-[#5252ff]' : 'opacity-70'} />
+                      <Icon size={16} className={isActive ? 'text-brand' : 'opacity-70'} />
                       {item.name}
                     </Link>
                   );
@@ -436,22 +485,22 @@ export default function DashboardLayout() {
         </nav>
 
         {/* Bottom Widgets */}
-        <div className="border-t border-cobrar-border bg-cobrar-bg3">
+        <div className="border-t border-[#152840] bg-[#152840]/30">
           {/* Mi Caja Widget */}
-          <div className="p-4 border-b border-cobrar-border">
-            <div className="bg-cobrar-bg2 border border-cobrar-border p-3 rounded-xl mb-3">
+          <div className="p-4 border-b border-[#152840]">
+            <div className="bg-[#152840]/50 border border-[#152840] p-3 rounded-xl mb-3">
               <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2 text-sm font-semibold">
-                  <Wallet size={14} className={isRegisterOpen ? "text-cobrar-green" : "text-cobrar-txt3"} />
+                <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                  <Wallet size={14} className={isRegisterOpen ? "text-brand" : "text-white/50"} />
                   Mi Caja
                 </div>
                 {isRegisterOpen ? (
-                  <span className="bg-[#5252ff] text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Abierta</span>
+                  <span className="bg-brand text-[#1C3654] text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Abierta</span>
                 ) : (
-                  <span className="bg-cobrar-bg border border-cobrar-border text-cobrar-txt3 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Cerrada</span>
+                  <span className="bg-transparent border border-white/20 text-white/50 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Cerrada</span>
                 )}
               </div>
-              <div className="text-[11px] text-cobrar-txt2 mb-2 flex items-baseline gap-1">
+              <div className="text-[11px] text-white/70 mb-2 flex items-baseline gap-1">
                 Mi efectivo: <span className="font-bold text-white text-sm ml-1">${cashAmount.toFixed(2)}</span>
               </div>
               <button 
@@ -466,8 +515,8 @@ export default function DashboardLayout() {
                 }}
                 className={`w-full border py-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${
                   isRegisterOpen 
-                    ? 'bg-cobrar-bg border-cobrar-border hover:bg-[#5252ff]/10 hover:text-[#5252ff] hover:border-[#5252ff]/30' 
-                    : 'bg-[#5252ff] border-[#5252ff] text-white hover:bg-[#6666ff]'
+                    ? 'bg-transparent border-[#152840] text-white/70 hover:bg-[#152840] hover:text-white' 
+                    : 'bg-brand border-brand text-[#1C3654] hover:bg-brand-hover'
                 }`}
               >
                 {isRegisterOpen ? (
@@ -480,29 +529,34 @@ export default function DashboardLayout() {
           </div>
 
           {/* User Profile */}
-          <div className="p-4 border-t border-cobrar-border flex items-center justify-between">
+          <div className="p-4 border-t border-[#152840] flex items-center justify-between">
             <div className="flex items-center gap-3 overflow-hidden">
-              <div className="w-10 h-10 bg-[#5252ff]/10 border border-[#5252ff]/20 rounded-xl flex items-center justify-center shrink-0">
-                <User size={20} className="text-[#5252ff]" />
+              <div className="w-10 h-10 bg-[#152840] border border-white/10 rounded-xl flex items-center justify-center shrink-0">
+                <User size={20} className="text-white/80" />
               </div>
               <div className="truncate">
                 <p className="text-sm font-medium text-white truncate">{profile?.username || user.email}</p>
-                <p className="text-xs text-cobrar-txt3 truncate">{userRole}</p>
+                <p className="text-xs text-white/50 truncate">{userRole}</p>
               </div>
             </div>
-            <button onClick={handleSignOut} className="p-2 text-cobrar-txt3 hover:text-red-400 transition-colors">
-              <LogOut size={18} />
-            </button>
+            <div className="flex items-center gap-1">
+              <button onClick={toggleTheme} className="p-2 text-white/50 hover:text-white transition-colors">
+                {isDark ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+              <button onClick={handleSignOut} className="p-2 text-white/50 hover:text-red-400 transition-colors">
+                <LogOut size={18} />
+              </button>
+            </div>
           </div>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col h-full bg-cobrar-bg relative overflow-hidden z-10 min-w-0">
+      <main className="flex-1 flex flex-col h-full bg-bg relative overflow-hidden z-10 min-w-0">
 
         {/* Banner de Impersonación */}
         {useAuth().impersonatedOwnerId && (
-          <div className="bg-red-500 text-white px-4 py-2 text-xs font-bold flex justify-between items-center z-50 shadow-md">
+          <div className="bg-red-500 text-text px-4 py-2 text-xs font-bold flex justify-between items-center z-50 shadow-md">
             <div className="flex items-center gap-2">
               <Shield size={16} />
               Estás impersonando la tienda de otro usuario. Todo lo que hagas afectará a su cuenta real.
@@ -517,8 +571,8 @@ export default function DashboardLayout() {
         )}
 
         {/* Top bar (mobile) */}
-        <header className="lg:hidden sticky top-0 z-30 flex items-center justify-between gap-3 px-4 py-2.5 bg-cobrar-bg2 border-b border-cobrar-border shrink-0 pt-[max(0.625rem,env(safe-area-inset-top))]">
-          <button onClick={() => setMobileOpen(true)} aria-label="Abrir menú" className="p-2 -ml-2 text-cobrar-txt2 hover:text-white transition-colors">
+        <header className="lg:hidden sticky top-0 z-30 flex items-center justify-between gap-3 px-4 py-2.5 bg-surface border-b border-border shrink-0 pt-[max(0.625rem,env(safe-area-inset-top))]">
+          <button onClick={() => setMobileOpen(true)} aria-label="Abrir menú" className="p-2 -ml-2 text-muted hover:text-text transition-colors">
             <Menu size={22} />
           </button>
           <div className="flex items-center gap-2">
@@ -528,14 +582,14 @@ export default function DashboardLayout() {
                 <polyline points="17,32 27,43 47,22" stroke="white" strokeWidth="6.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
-            <span className="font-head font-bold text-white text-sm">Cobrar</span>
+            <span className="font-display font-bold text-text text-sm">Cobrar</span>
           </div>
           <button
             onClick={() => {
               if (!isRegisterOpen) { setCashAction('abrir'); setShowCashModal(true); return; }
               setShowCashModal(true); setCashAction(null);
             }}
-            className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors ${isRegisterOpen ? 'border-[#5252ff]/30 text-[#5252ff] bg-[#5252ff]/10' : 'border-cobrar-border text-cobrar-txt2'}`}
+            className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors ${isRegisterOpen ? 'border-brand/30 text-brand bg-brand/10' : 'border-border text-muted'}`}
           >
             <Wallet size={14} /> ${cashAmount.toLocaleString('es-AR', { maximumFractionDigits: 0 })}
           </button>
@@ -543,13 +597,13 @@ export default function DashboardLayout() {
 
         {/* Banner de Recordatorio */}
         {showReminder && (
-          <div className="bg-[#5252ff]/10 border-b border-[#5252ff]/30 px-6 py-3 flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-2 text-[#5252ff] text-sm font-bold">
+          <div className="bg-brand/10 border-b border-brand/30 px-6 py-3 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2 text-brand text-sm font-bold">
               <span className="animate-pulse">🔔</span> {reminderMessage}
             </div>
             <button 
               onClick={() => setShowReminder(false)}
-              className="text-cobrar-txt3 hover:text-white"
+              className="text-dim hover:text-text"
             >
               <X size={16} />
             </button>
@@ -562,7 +616,7 @@ export default function DashboardLayout() {
       </main>
 
       {/* Bottom navigation (mobile) */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-cobrar-bg2/95 backdrop-blur-md border-t border-cobrar-border flex items-stretch justify-around pb-[env(safe-area-inset-bottom)]">
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-surface/95 backdrop-blur-md border-t border-border flex items-stretch justify-around pb-[env(safe-area-inset-bottom)]">
         {bottomNav.filter(item => !item.roles || item.roles.includes(userRole) || userRole === 'Propietario').map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname.startsWith(item.path);
@@ -570,7 +624,7 @@ export default function DashboardLayout() {
             <Link
               key={item.path}
               to={item.path}
-              className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 min-h-[3.5rem] text-[10px] font-medium transition-colors ${isActive ? 'text-[#5252ff]' : 'text-cobrar-txt2'}`}
+              className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 min-h-[3.5rem] text-[10px] font-medium transition-colors ${isActive ? 'text-brand' : 'text-muted'}`}
             >
               <Icon size={20} />
               {item.name}
@@ -579,7 +633,7 @@ export default function DashboardLayout() {
         })}
         <button
           onClick={() => setMobileOpen(true)}
-          className="flex-1 flex flex-col items-center justify-center gap-1 py-2.5 min-h-[3.5rem] text-[10px] font-medium text-cobrar-txt2 transition-colors"
+          className="flex-1 flex flex-col items-center justify-center gap-1 py-2.5 min-h-[3.5rem] text-[10px] font-medium text-muted transition-colors"
         >
           <Menu size={20} />
           Más
@@ -589,7 +643,7 @@ export default function DashboardLayout() {
       {/* Cash Management Modal */}
       {showCashModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[#0f0f13] border border-cobrar-border rounded-2xl w-full max-w-[400px] max-h-[90vh] overflow-y-auto shadow-2xl relative">
+          <div className="bg-bg border border-border rounded-2xl w-full max-w-[400px] max-h-[90vh] overflow-y-auto shadow-2xl relative">
             
             <button 
               onClick={() => {
@@ -597,7 +651,7 @@ export default function DashboardLayout() {
                 setCashAction(null);
                 setInputValue('');
               }}
-              className="absolute top-4 right-4 text-cobrar-txt3 hover:text-white transition-colors z-10"
+              className="absolute top-4 right-4 text-dim hover:text-text transition-colors z-10"
             >
               <X size={18} />
             </button>
@@ -605,21 +659,21 @@ export default function DashboardLayout() {
             <div className="p-6">
               {!cashAction ? (
                 <>
-                  <h2 className="text-lg font-head font-bold text-white flex items-center gap-2 mb-2">
-                    <span className="text-cobrar-txt2">$</span> Gestionar caja
+                  <h2 className="text-lg font-display font-bold text-text flex items-center gap-2 mb-2">
+                    <span className="text-muted">$</span> Gestionar caja
                   </h2>
-                  <p className="text-sm text-cobrar-txt2 mb-6 leading-relaxed">
+                  <p className="text-sm text-muted mb-6 leading-relaxed">
                     Revisa tu efectivo disponible y elegí una acción para continuar.
                   </p>
 
-                  <div className="bg-[#1a1a23] border border-cobrar-border rounded-xl p-5 mb-6 flex justify-between items-center">
+                  <div className="bg-surface-2 border border-border rounded-xl p-5 mb-6 flex justify-between items-center">
                     <div>
-                      <p className="text-xs text-cobrar-txt2 font-medium mb-1">Efectivo disponible</p>
-                      <p className="text-3xl font-bold text-white">${cashAmount.toFixed(2)}</p>
+                      <p className="text-xs text-muted font-medium mb-1">Efectivo disponible</p>
+                      <p className="text-3xl font-bold text-text">${cashAmount.toFixed(2)}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-cobrar-txt2">Operador</p>
-                      <p className="text-sm font-medium text-white">{profile?.username || user.email}</p>
+                      <p className="text-sm text-muted">Operador</p>
+                      <p className="text-sm font-medium text-text">{profile?.username || user.email}</p>
                     </div>
                     <div className="text-[#3a3a4a]">
                       <span className="text-5xl font-light">$</span>
@@ -627,17 +681,17 @@ export default function DashboardLayout() {
                   </div>
 
                   <div className="space-y-3">
-                    {(userRole === 'Gerente' || userRole === 'Empleado PLUS') && (
+                    {['Propietario', 'Superadmin', 'Gerente', 'Empleado PLUS'].includes(userRole) && (
                       <>
                         <button 
                           onClick={() => setCashAction('ingresar')}
-                          className="w-full bg-[#1a1a23] hover:bg-cobrar-bg3 border border-cobrar-border py-3.5 rounded-xl text-sm font-medium text-white transition-all flex items-center justify-center gap-2"
+                          className="w-full bg-surface-2 hover:bg-surface-2 border border-border py-3.5 rounded-xl text-sm font-medium text-text transition-all flex items-center justify-center gap-2"
                         >
-                          <ArrowUpCircle size={16} className="text-cobrar-green" /> Ingresar efectivo
+                          <ArrowUpCircle size={16} className="text-brand" /> Ingresar efectivo
                         </button>
                         <button 
                           onClick={() => setCashAction('retirar')}
-                          className="w-full bg-[#1a1a23] hover:bg-cobrar-bg3 border border-cobrar-border py-3.5 rounded-xl text-sm font-medium text-white transition-all flex items-center justify-center gap-2"
+                          className="w-full bg-surface-2 hover:bg-surface-2 border border-border py-3.5 rounded-xl text-sm font-medium text-text transition-all flex items-center justify-center gap-2"
                         >
                           <ArrowDownCircle size={16} className="text-red-400" /> Retirar efectivo
                         </button>
@@ -645,7 +699,7 @@ export default function DashboardLayout() {
                     )}
                     <button 
                       onClick={() => setCashAction('cerrar')}
-                      className="w-full bg-[#994747] hover:bg-[#b05252] text-white font-bold py-3.5 rounded-xl transition-all text-sm flex items-center justify-center gap-2 mt-2 shadow-[0_4px_15px_rgba(153,71,71,0.2)]"
+                      className="w-full bg-[#994747] hover:bg-[#b05252] text-text font-bold py-3.5 rounded-xl transition-all text-sm flex items-center justify-center gap-2 mt-2 shadow-[0_4px_15px_rgba(153,71,71,0.2)]"
                     >
                       <Calculator size={16} /> Cerrar caja
                     </button>
@@ -656,26 +710,26 @@ export default function DashboardLayout() {
                   <div className="w-16 h-16 bg-[#994747]/10 border border-[#994747]/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Calculator size={32} className="text-[#994747]" />
                   </div>
-                  <h2 className="text-xl font-bold text-white mb-2">¿Estás seguro?</h2>
-                  <p className="text-sm text-cobrar-txt2 mb-6">
+                  <h2 className="text-xl font-bold text-text mb-2">¿Estás seguro?</h2>
+                  <p className="text-sm text-muted mb-6">
                     Se cerrará el turno actual. Deberás ingresar el conteo final de caja y abrirla nuevamente mañana.
                   </p>
                   
-                  <div className="bg-[#1a1a23] border border-cobrar-border rounded-xl p-4 mb-6 text-left flex justify-between items-center">
-                    <span className="text-sm text-cobrar-txt2">Total a rendir:</span>
-                    <span className="text-lg font-bold text-white">${cashAmount.toFixed(2)}</span>
+                  <div className="bg-surface-2 border border-border rounded-xl p-4 mb-6 text-left flex justify-between items-center">
+                    <span className="text-sm text-muted">Total a rendir:</span>
+                    <span className="text-lg font-bold text-text">${cashAmount.toFixed(2)}</span>
                   </div>
 
                   <div className="flex gap-3">
                     <button 
                       onClick={() => setCashAction(null)}
-                      className="flex-1 bg-transparent hover:bg-cobrar-bg2 border border-cobrar-border text-white font-medium py-3 rounded-xl transition-all text-sm"
+                      className="flex-1 bg-transparent hover:bg-surface border border-border text-text font-medium py-3 rounded-xl transition-all text-sm"
                     >
                       Cancelar
                     </button>
                     <button 
                       onClick={handleCloseRegister}
-                      className="flex-1 bg-[#994747] hover:bg-[#b05252] text-white font-bold py-3 rounded-xl transition-all text-sm shadow-[0_4px_15px_rgba(153,71,71,0.2)]"
+                      className="flex-1 bg-[#994747] hover:bg-[#b05252] text-text font-bold py-3 rounded-xl transition-all text-sm shadow-[0_4px_15px_rgba(153,71,71,0.2)]"
                     >
                       Cerrar Turno
                     </button>
@@ -688,24 +742,24 @@ export default function DashboardLayout() {
                       setCashAction(null);
                       setInputValue('');
                     }}
-                    className="text-cobrar-txt3 hover:text-white flex items-center gap-1 text-sm mb-4 transition-colors"
+                    className="text-dim hover:text-text flex items-center gap-1 text-sm mb-4 transition-colors"
                   >
                     ← Volver
                   </button>
-                  <h2 className="text-lg font-head font-bold text-white mb-1">
+                  <h2 className="text-lg font-display font-bold text-text mb-1">
                     {cashAction === 'ingresar' ? 'Ingresar Efectivo' : cashAction === 'retirar' ? 'Retirar Efectivo' : 'Apertura de Caja'}
                   </h2>
-                  <p className="text-sm text-cobrar-txt2 mb-6">
+                  <p className="text-sm text-muted mb-6">
                     {cashAction === 'ingresar' ? 'Añade fondo a tu caja.' : cashAction === 'retirar' ? 'Retira dinero para pagos o extracción.' : 'Ingresa el monto inicial con el que arrancas el turno (cambio).'}
                   </p>
 
                   <div className="space-y-4 mb-6">
                     <div>
-                      <label className="block text-xs font-bold text-white mb-2">
+                      <label className="block text-xs font-bold text-text mb-2">
                         {cashAction === 'abrir' ? 'Monto Inicial' : `Monto a ${cashAction}`}
                       </label>
                       <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg text-cobrar-txt2 font-bold">$</span>
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg text-muted font-bold">$</span>
                         <input 
                           type="number"
                           min="0.01"
@@ -716,7 +770,7 @@ export default function DashboardLayout() {
                             setErrorMsg('');
                           }}
                           placeholder="0.00"
-                          className={`w-full bg-[#1a1a23] border rounded-xl py-3 pl-8 pr-4 text-white text-lg font-bold focus:outline-none transition-colors ${errorMsg ? 'border-red-500 focus:border-red-500' : 'border-cobrar-border focus:border-[#5252ff]'}`}
+                          className={`w-full bg-surface-2 border rounded-xl py-3 pl-8 pr-4 text-text text-lg font-bold focus:outline-none transition-colors ${errorMsg ? 'border-red-500 focus:border-red-500' : 'border-border focus:border-brand'}`}
                           autoFocus
                         />
                       </div>
@@ -725,18 +779,18 @@ export default function DashboardLayout() {
                       )}
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-white mb-2">Motivo (opcional)</label>
+                      <label className="block text-xs font-bold text-text mb-2">Motivo (opcional)</label>
                       <input 
                         type="text"
                         placeholder="Ej. Cambio, Pago a proveedor..."
-                        className="w-full bg-[#1a1a23] border border-cobrar-border rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-[#5252ff] transition-colors"
+                        className="w-full bg-surface-2 border border-border rounded-xl py-3 px-4 text-sm text-text focus:outline-none focus:border-brand transition-colors"
                       />
                     </div>
                   </div>
 
                   <button 
                     onClick={handleCashSubmit}
-                    className="w-full bg-[#5252ff] hover:bg-[#6666ff] text-white font-bold py-3.5 rounded-xl transition-all shadow-[0_4px_15px_rgba(82,82,255,0.25)] flex justify-center"
+                    className="w-full bg-brand hover:bg-brand-hover text-text font-bold py-3.5 rounded-xl transition-all shadow-[0_4px_15px_rgba(82,82,255,0.25)] flex justify-center"
                   >
                     Confirmar {cashAction === 'ingresar' ? 'Ingreso' : cashAction === 'retirar' ? 'Retiro' : 'Apertura'}
                   </button>

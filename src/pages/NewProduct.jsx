@@ -160,7 +160,7 @@ export default function NewProduct() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-bg overflow-y-auto">
+    <div className="flex flex-col bg-bg">
       {/* Header */}
       <div className="bg-surface border-b border-border p-4 md:p-6 sticky top-0 z-10">
         <button 

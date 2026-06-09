@@ -154,7 +154,7 @@ export default function Reports() {
   }, [user]);
 
   return (
-    <div className="flex flex-col h-full bg-bg overflow-y-auto p-4 md:p-8 custom-scrollbar">
+    <div className="flex flex-col bg-bg p-4 md:p-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-8">
         <div>
           <h1 className="text-2xl font-display font-bold text-text">Reportes</h1>
@@ -195,7 +195,7 @@ export default function Reports() {
             <DollarSign size={20} />
           </div>
           <p className="text-xs text-muted font-medium mb-1">Ingresos del periodo</p>
-          <h3 className="text-3xl font-bold text-text">
+          <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-text truncate" title={`$${metrics.ingresos.toLocaleString('es-AR')}`}>
             {loading ? <Loader2 className="animate-spin text-dim" size={24} /> : `$${metrics.ingresos.toLocaleString('es-AR')}`}
           </h3>
         </div>
@@ -204,7 +204,7 @@ export default function Reports() {
             <TrendingUp size={20} />
           </div>
           <p className="text-xs text-muted font-medium mb-1">Ganancia estimada ({storeMargin}%)</p>
-          <h3 className="text-3xl font-bold text-text">
+          <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-text truncate" title={`$${metrics.ganancia.toLocaleString('es-AR', { maximumFractionDigits: 0 })}`}>
             {loading ? <Loader2 className="animate-spin text-dim" size={24} /> : `$${metrics.ganancia.toLocaleString('es-AR', { maximumFractionDigits: 0 })}`}
           </h3>
         </div>
@@ -213,7 +213,7 @@ export default function Reports() {
             <BarChartIcon size={20} />
           </div>
           <p className="text-xs text-muted font-medium mb-1">Total de Ventas</p>
-          <h3 className="text-3xl font-bold text-text">
+          <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-text truncate">
             {loading ? <Loader2 className="animate-spin text-dim" size={24} /> : metrics.ventas}
           </h3>
         </div>
@@ -222,7 +222,7 @@ export default function Reports() {
             <FileText size={20} />
           </div>
           <p className="text-xs text-muted font-medium mb-1">Ticket Promedio</p>
-          <h3 className="text-3xl font-bold text-text">
+          <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-text truncate" title={`$${metrics.ticket.toLocaleString('es-AR', { maximumFractionDigits: 0 })}`}>
             {loading ? <Loader2 className="animate-spin text-dim" size={24} /> : `$${metrics.ticket.toLocaleString('es-AR', { maximumFractionDigits: 0 })}`}
           </h3>
         </div>
@@ -280,9 +280,9 @@ export default function Reports() {
           <div className="bg-surface-2 border border-border rounded-2xl p-6 h-64 flex flex-col">
             <div className="flex justify-between items-center mb-4">
               <p className="text-sm text-text font-bold">Estado de Caja</p>
-              <span className="text-xl font-bold text-brand">${metrics.cajaActual.toLocaleString('es-AR')}</span>
+              <span className="text-xl font-bold text-brand truncate max-w-[120px]" title={`$${metrics.cajaActual.toLocaleString('es-AR')}`}>${metrics.cajaActual.toLocaleString('es-AR')}</span>
             </div>
-            <div className="flex-1 overflow-auto custom-scrollbar">
+            <div className="overflow-y-auto overflow-x-auto flex-1 custom-scrollbar">
               <table className="w-full text-left text-sm">
                 <tbody>
                   {cashMovements.slice(0, 5).map(m => (

@@ -169,7 +169,7 @@ export default function Users() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-bg overflow-y-auto p-4 md:p-8 custom-scrollbar">
+    <div className="flex flex-col bg-bg p-4 md:p-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-8 shrink-0">
         <div>
           <h1 className="text-2xl font-display font-bold text-text">Usuarios</h1>
@@ -195,7 +195,7 @@ export default function Users() {
         </div>
       </div>
       
-      <div className="flex-1 bg-surface-2 border border-border rounded-2xl flex flex-col overflow-hidden">
+      <div className="bg-surface-2 border border-border rounded-2xl flex flex-col">
         {/* Toolbar */}
         <div className="p-4 border-b border-border bg-surface flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center shrink-0">
           <div className="relative w-full sm:w-80">
@@ -226,7 +226,7 @@ export default function Users() {
         </div>
 
         {/* Table */}
-        <div className="flex-1 overflow-auto overflow-x-auto">
+        <div className="overflow-x-auto">
           {loading ? (
             <div className="flex items-center justify-center h-48 text-muted">
               <Loader2 className="animate-spin mr-2" size={24} /> Cargando usuarios...

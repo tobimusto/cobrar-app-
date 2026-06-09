@@ -115,7 +115,7 @@ export default function Clients() {
   );
 
   return (
-    <div className="flex flex-col h-full bg-bg overflow-y-auto p-4 md:p-8 custom-scrollbar">
+    <div className="flex flex-col bg-bg p-4 md:p-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-8 shrink-0">
         <div>
           <h1 className="text-2xl font-display font-bold text-text">Clientes</h1>
@@ -135,7 +135,7 @@ export default function Clients() {
         </div>
       </div>
       
-      <div className="flex-1 bg-surface-2 border border-border rounded-2xl flex flex-col overflow-hidden">
+      <div className="bg-surface-2 border border-border rounded-2xl flex flex-col">
         <div className="p-4 border-b border-border bg-surface">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
@@ -172,7 +172,7 @@ export default function Clients() {
             </button>
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto p-4 md:p-6">
+          <div className="p-4 md:p-6">
             <div className="overflow-x-auto">
             <table className="w-full min-w-[640px] text-left text-sm text-muted">
               <thead className="text-xs text-dim uppercase border-b border-border">

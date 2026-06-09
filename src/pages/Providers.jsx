@@ -117,7 +117,7 @@ export default function Providers() {
   );
 
   return (
-    <div className="flex flex-col h-full bg-bg overflow-y-auto p-4 md:p-8 custom-scrollbar">
+    <div className="flex flex-col bg-bg p-4 md:p-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-8 shrink-0">
         <div>
           <h1 className="text-2xl font-display font-bold text-text">Proveedores</h1>
@@ -131,7 +131,7 @@ export default function Providers() {
         </button>
       </div>
 
-      <div className="flex-1 bg-surface-2 border border-border rounded-2xl flex flex-col overflow-hidden">
+      <div className="bg-surface-2 border border-border rounded-2xl flex flex-col">
         <div className="p-4 border-b border-border bg-surface">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
@@ -145,7 +145,7 @@ export default function Providers() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-auto p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {loading ? (
             <div className="col-span-full flex justify-center p-12">
               <Loader2 className="animate-spin text-brand" size={32} />

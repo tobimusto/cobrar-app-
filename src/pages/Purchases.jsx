@@ -269,7 +269,7 @@ export default function Purchases() {
   );
 
   return (
-    <div className="flex flex-col h-full bg-bg overflow-y-auto p-4 md:p-8 custom-scrollbar">
+    <div className="flex flex-col bg-bg p-4 md:p-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-8 shrink-0">
         <div>
           <h1 className="text-2xl font-display font-bold text-text">Compras</h1>
@@ -293,7 +293,7 @@ export default function Purchases() {
         </div>
       </div>
       
-      <div className="flex-1 bg-surface-2 border border-border rounded-2xl flex flex-col overflow-hidden">
+      <div className="bg-surface-2 border border-border rounded-2xl flex flex-col">
         <div className="p-4 border-b border-border bg-surface">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
@@ -312,7 +312,7 @@ export default function Purchases() {
           <p className="text-xs text-muted mt-1">Consulta las compras registradas y editalas cuando sea necesario.</p>
         </div>
 
-        <div className="flex-1 overflow-auto overflow-x-auto">
+        <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] text-left border-collapse">
             <thead className="bg-surface sticky top-0 z-10">
               <tr>

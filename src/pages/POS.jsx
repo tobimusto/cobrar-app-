@@ -550,9 +550,9 @@ export default function POS() {
         </div>
       </div>
 
-      <div className="flex flex-1 overflow-hidden p-6 gap-6">
+      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden p-4 md:p-6 gap-6 overflow-y-auto lg:overflow-y-hidden">
         {/* LEFT COLUMN: Search & Cart */}
-        <div className="flex-1 flex flex-col gap-6 min-w-0">
+        <div className="w-full lg:flex-1 flex flex-col gap-6 min-w-0">
           
           {/* Search Box */}
           <div className="bg-surface-2 border border-border rounded-2xl p-5 shrink-0">
@@ -746,7 +746,7 @@ export default function POS() {
         </div>
 
         {/* RIGHT COLUMN: Client & Summary */}
-        <div className="w-[350px] flex flex-col gap-6 shrink-0">
+        <div className="w-full lg:w-[350px] flex flex-col gap-6 shrink-0">
           
           {/* Client Box */}
           <div className="bg-surface-2 border border-border rounded-2xl p-5">

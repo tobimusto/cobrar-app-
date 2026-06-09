@@ -371,7 +371,7 @@ export default function Inventory() {
   };
 
   return (
-    <div className="flex flex-col h-full p-4 md:p-8 overflow-hidden">
+    <div className="flex flex-col p-4 md:p-8">
       <div className="flex flex-col gap-3 lg:flex-row lg:justify-between lg:items-center mb-8 shrink-0">
         <div>
           <h2 className="font-display font-bold text-2xl text-text">Inventario</h2>
@@ -408,7 +408,7 @@ export default function Inventory() {
         </div>
       </div>
       
-      <div className="flex-1 bg-surface-2 border border-border rounded-2xl flex flex-col overflow-hidden">
+      <div className="bg-surface-2 border border-border rounded-2xl flex flex-col">
         {/* Toolbar */}
         <div className="p-4 border-b border-border bg-surface flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center shrink-0">
           <div className="relative w-full sm:w-80">
@@ -432,7 +432,7 @@ export default function Inventory() {
         </div>
 
         {/* Table */}
-        <div className="flex-1 overflow-auto">
+        <div className="overflow-x-auto pb-4">
           <table className="w-full min-w-[640px] text-left border-collapse">
             <thead className="bg-surface sticky top-0 z-10">
               <tr>

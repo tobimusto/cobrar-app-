@@ -217,6 +217,7 @@ export default function DashboardLayout() {
             { name: 'Plan', path: '/settings?tab=Plan' },
           ]
         },
+        { name: 'Volver a la Web', path: 'https://cobrarapp.com.ar', icon: Globe, roles: ['Propietario', 'Gerente', 'Empleado PLUS', 'Empleado', 'Cajero', 'Superadmin'] }
       ]
     }
   ];
@@ -328,13 +329,13 @@ export default function DashboardLayout() {
         <div onClick={closeMobile} aria-hidden="true" className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden" />
       )}
       {/* Sidebar / Drawer */}
-      <aside className={`w-[min(84vw,18rem)] lg:w-64 bg-[#1C3654] border-r border-[#152840] flex flex-col shrink-0 fixed lg:static inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-out ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
+      <aside className={`w-[min(84vw,18rem)] lg:w-64 bg-surface border-r border-border flex flex-col shrink-0 fixed lg:static inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-out ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
         
         {/* Business Selector Top */}
         <div className="p-4 relative">
           <button 
             onClick={() => setShowBusinessMenu(!showBusinessMenu)}
-            className={`w-full flex items-center justify-between p-3 rounded-xl transition-all text-left border-transparent bg-[#152840]/50 hover:bg-[#152840] shadow-sm`}
+            className={`w-full flex items-center justify-between p-3 rounded-xl transition-all text-left border-transparent bg-surface-2 hover:bg-surface-2/80 shadow-sm`}
           >
             <div className="flex items-center gap-3">
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden shrink-0`}>
@@ -344,11 +345,11 @@ export default function DashboardLayout() {
                 </svg>
               </div>
               <div className="flex flex-col">
-                <span className={`font-bold text-sm leading-tight text-white`}>Cobrar Pos</span>
-                <span className={`text-[10px] leading-tight text-white/70`}>#De91 - Propietario</span>
+                <span className={`font-bold text-sm leading-tight text-text`}>Cobrar Pos</span>
+                <span className={`text-[10px] leading-tight text-muted`}>#De91 - Propietario</span>
               </div>
             </div>
-            {showBusinessMenu ? <ChevronUp size={16} className="text-white/80" /> : <ChevronDown size={16} className="text-white/50" />}
+            {showBusinessMenu ? <ChevronUp size={16} className="text-text" /> : <ChevronDown size={16} className="text-muted" />}
           </button>
 
           {/* Business Dropdown */}
@@ -389,7 +390,7 @@ export default function DashboardLayout() {
           <div className="space-y-6">
             {filteredMenuGroups.map((group, i) => (
             <div key={i}>
-              <h3 className="text-[10px] font-display font-bold tracking-widest text-white/40 uppercase mb-2 px-3">
+              <h3 className="text-[10px] font-display font-bold tracking-widest text-muted/60 uppercase mb-2 px-3">
                 {group.title}
               </h3>
               <div className="space-y-1">
@@ -405,7 +406,7 @@ export default function DashboardLayout() {
                         href={item.path}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-medium text-[13px] text-white/70 hover:bg-[#152840] hover:text-white"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-medium text-[13px] text-muted hover:bg-surface-2 hover:text-text"
                       >
                         <Icon size={16} className="opacity-70" />
                         {item.name}
@@ -419,7 +420,7 @@ export default function DashboardLayout() {
                       <div key={item.name} className="flex flex-col">
                         <button
                           onClick={() => toggleMenu(item.name)}
-                          className="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all font-medium text-[13px] text-white/70 hover:bg-[#152840] hover:text-white"
+                          className="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all font-medium text-[13px] text-muted hover:bg-surface-2 hover:text-text"
                         >
                           <div className="flex items-center gap-3">
                             <Icon size={16} className="opacity-70" />
@@ -440,7 +441,7 @@ export default function DashboardLayout() {
                                     href={sub.path}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="py-2 px-3 rounded-lg text-[13px] transition-colors text-white/50 hover:text-white hover:bg-[#152840]"
+                                    className="py-2 px-3 rounded-lg text-[13px] transition-colors text-muted hover:text-text hover:bg-surface-2"
                                   >
                                     {sub.name}
                                   </a>
@@ -451,7 +452,7 @@ export default function DashboardLayout() {
                                 <Link
                                   key={sub.name}
                                   to={sub.path}
-                                  className={`py-2 px-3 rounded-lg text-[13px] transition-colors ${isSubActive ? 'text-white font-bold bg-[#152840]' : 'text-white/50 hover:text-white hover:bg-[#152840]'}`}
+                                  className={`py-2 px-3 rounded-lg text-[13px] transition-colors ${isSubActive ? 'text-text font-bold bg-surface-2' : 'text-muted hover:text-text hover:bg-surface-2'}`}
                                 >
                                   {sub.name}
                                 </Link>
@@ -469,8 +470,8 @@ export default function DashboardLayout() {
                       to={item.path}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all font-medium text-[13px] ${
                         isActive 
-                          ? 'bg-[#152840] text-brand' 
-                          : 'text-white/70 hover:bg-[#152840] hover:text-white'
+                          ? 'bg-brand/10 text-brand' 
+                          : 'text-muted hover:bg-surface-2 hover:text-text'
                       }`}
                     >
                       <Icon size={16} className={isActive ? 'text-brand' : 'opacity-70'} />
@@ -485,23 +486,23 @@ export default function DashboardLayout() {
         </nav>
 
         {/* Bottom Widgets */}
-        <div className="border-t border-[#152840] bg-[#152840]/30">
+        <div className="border-t border-border bg-surface-2/30">
           {/* Mi Caja Widget */}
-          <div className="p-4 border-b border-[#152840]">
-            <div className="bg-[#152840]/50 border border-[#152840] p-3 rounded-xl mb-3">
+          <div className="p-4 border-b border-border">
+            <div className="bg-surface border border-border p-3 rounded-xl mb-3">
               <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2 text-sm font-semibold text-white">
-                  <Wallet size={14} className={isRegisterOpen ? "text-brand" : "text-white/50"} />
+                <div className="flex items-center gap-2 text-sm font-semibold text-text">
+                  <Wallet size={14} className={isRegisterOpen ? "text-brand" : "text-muted"} />
                   Mi Caja
                 </div>
                 {isRegisterOpen ? (
-                  <span className="bg-brand text-[#1C3654] text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Abierta</span>
+                  <span className="bg-brand/20 text-brand text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Abierta</span>
                 ) : (
-                  <span className="bg-transparent border border-white/20 text-white/50 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Cerrada</span>
+                  <span className="bg-transparent border border-border text-muted text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Cerrada</span>
                 )}
               </div>
-              <div className="text-[11px] text-white/70 mb-2 flex items-baseline gap-1">
-                Mi efectivo: <span className="font-bold text-white text-sm ml-1">${cashAmount.toFixed(2)}</span>
+              <div className="text-[11px] text-muted mb-2 flex items-baseline gap-1">
+                Mi efectivo: <span className="font-bold text-text text-sm ml-1">${cashAmount.toFixed(2)}</span>
               </div>
               <button 
                 onClick={() => {
@@ -515,8 +516,8 @@ export default function DashboardLayout() {
                 }}
                 className={`w-full border py-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${
                   isRegisterOpen 
-                    ? 'bg-transparent border-[#152840] text-white/70 hover:bg-[#152840] hover:text-white' 
-                    : 'bg-brand border-brand text-[#1C3654] hover:bg-brand-hover'
+                    ? 'bg-transparent border-border text-muted hover:bg-surface-2 hover:text-text' 
+                    : 'bg-brand border-brand text-white hover:bg-brand-hover'
                 }`}
               >
                 {isRegisterOpen ? (
@@ -529,21 +530,21 @@ export default function DashboardLayout() {
           </div>
 
           {/* User Profile */}
-          <div className="p-4 border-t border-[#152840] flex items-center justify-between">
+          <div className="p-4 border-t border-border flex items-center justify-between">
             <div className="flex items-center gap-3 overflow-hidden">
-              <div className="w-10 h-10 bg-[#152840] border border-white/10 rounded-xl flex items-center justify-center shrink-0">
-                <User size={20} className="text-white/80" />
+              <div className="w-10 h-10 bg-surface-2 border border-border rounded-xl flex items-center justify-center shrink-0">
+                <User size={20} className="text-muted" />
               </div>
               <div className="truncate">
-                <p className="text-sm font-medium text-white truncate">{profile?.username || user.email}</p>
-                <p className="text-xs text-white/50 truncate">{userRole}</p>
+                <p className="text-sm font-medium text-text truncate">{profile?.username || user.email}</p>
+                <p className="text-xs text-muted truncate">{userRole}</p>
               </div>
             </div>
             <div className="flex items-center gap-1">
-              <button onClick={toggleTheme} className="p-2 text-white/50 hover:text-white transition-colors">
+              <button onClick={toggleTheme} className="p-2 text-muted hover:text-text transition-colors">
                 {isDark ? <Sun size={18} /> : <Moon size={18} />}
               </button>
-              <button onClick={handleSignOut} className="p-2 text-white/50 hover:text-red-400 transition-colors">
+              <button onClick={handleSignOut} className="p-2 text-muted hover:text-red-400 transition-colors">
                 <LogOut size={18} />
               </button>
             </div>
@@ -610,35 +611,12 @@ export default function DashboardLayout() {
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0">
+        <div className="flex-1 overflow-y-auto pb-[env(safe-area-inset-bottom)]">
           <Outlet context={{ isRegisterOpen, setShowCashModal, setCashAction, cashAmount, setCashAmount, showHelpMenu, setShowHelpMenu }} />
         </div>
       </main>
 
-      {/* Bottom navigation (mobile) */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-surface/95 backdrop-blur-md border-t border-border flex items-stretch justify-around pb-[env(safe-area-inset-bottom)]">
-        {bottomNav.filter(item => !item.roles || item.roles.includes(userRole) || userRole === 'Propietario').map((item) => {
-          const Icon = item.icon;
-          const isActive = location.pathname.startsWith(item.path);
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 min-h-[3.5rem] text-[10px] font-medium transition-colors ${isActive ? 'text-brand' : 'text-muted'}`}
-            >
-              <Icon size={20} />
-              {item.name}
-            </Link>
-          );
-        })}
-        <button
-          onClick={() => setMobileOpen(true)}
-          className="flex-1 flex flex-col items-center justify-center gap-1 py-2.5 min-h-[3.5rem] text-[10px] font-medium text-muted transition-colors"
-        >
-          <Menu size={20} />
-          Más
-        </button>
-      </nav>
+
 
       {/* Cash Management Modal */}
       {showCashModal && (
